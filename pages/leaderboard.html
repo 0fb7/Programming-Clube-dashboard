@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Leaderboard — CodeClub Admin</title>
+  <link rel="stylesheet" href="../css/base.css" />
+  <link rel="stylesheet" href="../css/dashboard.css" />
+  <link rel="stylesheet" href="../css/leaderboard.css" />
+</head>
+<body>
+  <div class="app-shell">
+    <aside class="sidebar">
+      <a class="sidebar-logo" href="overview.html">
+        <div class="sidebar-logo-icon">💻</div>
+        <div class="sidebar-logo-text">
+          CodeClub
+          <small>Admin Dashboard</small>
+        </div>
+      </a>
+
+      <nav class="sidebar-nav">
+        <span class="nav-label">Main</span>
+        <a class="nav-item" href="overview.html"><span class="icon">🏠</span><span>Overview</span></a>
+
+        <span class="nav-label">Management</span>
+        <a class="nav-item" href="students.html"><span class="icon">👨‍💻</span><span>Students</span></a>
+        <a class="nav-item" href="activities.html"><span class="icon">⚡</span><span>Activities</span></a>
+        <a class="nav-item" href="assignments.html"><span class="icon">📋</span><span>Assignments</span></a>
+
+        <span class="nav-label">Insights</span>
+        <a class="nav-item active" href="leaderboard.html"><span class="icon">🏆</span><span>Leaderboard</span></a>
+        <a class="nav-item" href="search.html"><span class="icon">🔍</span><span>Search</span></a>
+      </nav>
+
+      <div class="sidebar-footer">
+        <div class="user-card">
+          <div class="user-avatar" id="sidebar-avatar">A</div>
+          <div class="user-info">
+            <strong id="sidebar-username">Admin</strong>
+            <span>Administrator</span>
+          </div>
+        </div>
+        <button class="btn btn-danger" style="width:100%" id="logout-btn">🚪 <span>Sign Out</span></button>
+      </div>
+    </aside>
+
+    <div class="main-content">
+      <div class="topbar">
+        <div class="topbar-title">
+          <h2>🏆 Leaderboard</h2>
+          <p>Top students ranked by total points earned</p>
+        </div>
+      </div>
+
+      <div class="page-content">
+        <div class="card">
+          <div class="card-header">
+            <div>
+              <div class="card-title">Student Rankings</div>
+              <div class="card-subtitle">Sorted by total points from all assigned activities</div>
+            </div>
+          </div>
+          <div id="leaderboard-list">
+            <div class="empty-state">
+              <div class="emoji">🏆</div>
+              <p>No data yet. Add students and assign activities to see the leaderboard.</p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div id="toast-container"></div>
+
+  <script src="../js/utils.js"></script>
+  <script type="module" src="../js/leaderboard.js"></script>
+</body>
+</html>

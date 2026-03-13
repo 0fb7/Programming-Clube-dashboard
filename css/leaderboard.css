@@ -1,0 +1,49 @@
+/* ============================================================
+   leaderboard.css — Leaderboard Page Styles
+   Depends on: base.css, dashboard.css
+   ============================================================ */
+
+/* ── Leaderboard list item ── */
+.leaderboard-item {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  padding: 14px 16px;
+  border-radius: 10px;
+  margin-bottom: 8px;
+  background: rgba(255, 255, 255, 0.03);
+  border: 1px solid rgba(255, 255, 255, 0.05);
+  transition: background 0.15s;
+}
+.leaderboard-item:hover { background: rgba(255, 255, 255, 0.06); }
+
+/* ── Rank bubble ── */
+.rank {
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 14px;
+  font-weight: 800;
+  flex-shrink: 0;
+}
+.rank-1     { background: linear-gradient(135deg, #f59e0b, #ef4444); color: #fff; }
+.rank-2     { background: linear-gradient(135deg, #94a3b8, #64748b); color: #fff; }
+.rank-3     { background: linear-gradient(135deg, #d97706, #92400e); color: #fff; }
+.rank-other { background: rgba(255, 255, 255, 0.08); color: rgba(232, 232, 234, 0.5); font-size: 12px; }
+
+/* ── Student info column ── */
+.lb-info   { flex: 1; }
+.lb-name   { font-weight: 700; font-size: 14px; }
+.lb-meta   { font-size: 11px; color: rgba(232, 232, 234, 0.45); margin-top: 2px; }
+
+/* ── Points column ── */
+.lb-pts-col  { text-align: right; }
+.lb-pts      { font-size: 20px; font-weight: 800; color: var(--blue); line-height: 1; }
+.lb-pts small { font-size: 10px; font-weight: 600; color: rgba(232, 232, 234, 0.4); }
+.lb-asgn-count { font-size: 10px; color: rgba(232, 232, 234, 0.35); margin-top: 3px; }
+
+/* ── Progress bar within item ── */
+.lb-progress { margin-top: 6px; }

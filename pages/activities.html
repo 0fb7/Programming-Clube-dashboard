@@ -1,0 +1,132 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Activities — CodeClub Admin</title>
+  <link rel="stylesheet" href="../css/base.css" />
+  <link rel="stylesheet" href="../css/dashboard.css" />
+</head>
+<body>
+  <div class="app-shell">
+    <aside class="sidebar">
+      <a class="sidebar-logo" href="overview.html">
+        <div class="sidebar-logo-icon">💻</div>
+        <div class="sidebar-logo-text">
+          CodeClub
+          <small>Admin Dashboard</small>
+        </div>
+      </a>
+
+      <nav class="sidebar-nav">
+        <span class="nav-label">Main</span>
+        <a class="nav-item" href="overview.html"><span class="icon">🏠</span><span>Overview</span></a>
+
+        <span class="nav-label">Management</span>
+        <a class="nav-item" href="students.html"><span class="icon">👨‍💻</span><span>Students</span></a>
+        <a class="nav-item active" href="activities.html"><span class="icon">⚡</span><span>Activities</span></a>
+        <a class="nav-item" href="assignments.html"><span class="icon">📋</span><span>Assignments</span></a>
+
+        <span class="nav-label">Insights</span>
+        <a class="nav-item" href="leaderboard.html"><span class="icon">🏆</span><span>Leaderboard</span></a>
+        <a class="nav-item" href="search.html"><span class="icon">🔍</span><span>Search</span></a>
+      </nav>
+
+      <div class="sidebar-footer">
+        <div class="user-card">
+          <div class="user-avatar" id="sidebar-avatar">A</div>
+          <div class="user-info">
+            <strong id="sidebar-username">Admin</strong>
+            <span>Administrator</span>
+          </div>
+        </div>
+        <button class="btn btn-danger" style="width:100%" id="logout-btn">🚪 <span>Sign Out</span></button>
+      </div>
+    </aside>
+
+    <div class="main-content">
+      <div class="topbar">
+        <div class="topbar-title">
+          <h2>Activities</h2>
+          <p>Manage club activities</p>
+        </div>
+      </div>
+
+      <div class="page-content">
+        <div class="card">
+          <div class="card-header">
+            <div>
+              <div class="card-title">Create New Activity</div>
+              <div class="card-subtitle">Define activities and assign point values</div>
+            </div>
+          </div>
+
+          <div id="activity-form-alert" class="alert hidden"></div>
+
+          <div class="form-grid">
+            <div class="form-group">
+              <label for="a-name">Activity Name *</label>
+              <input class="form-control" id="a-name" type="text" placeholder="e.g. Hackathon 2024" />
+              <div class="field-error hidden" id="err-a-name">Activity name is required</div>
+            </div>
+
+            <div class="form-group">
+              <label for="a-id">Activity ID *</label>
+              <input class="form-control" id="a-id" type="text" placeholder="e.g. ACT-001" />
+              <div class="field-error hidden" id="err-a-id">Activity ID is required</div>
+            </div>
+
+            <div class="form-group">
+              <label for="a-pts">Point Value *</label>
+              <input class="form-control" id="a-pts" type="number" min="0" placeholder="e.g. 100" />
+              <div class="field-error hidden" id="err-a-pts">Point value is required</div>
+            </div>
+          </div>
+
+          <div class="form-actions">
+            <button class="btn btn-secondary" id="clear-activity-btn">Clear</button>
+            <button class="btn btn-primary" id="add-activity-btn">Create Activity</button>
+          </div>
+        </div>
+
+        <div class="card">
+          <div class="card-header">
+            <div>
+              <div class="card-title">Activities List</div>
+              <div class="card-subtitle" id="activities-count-label">0 activities</div>
+            </div>
+          </div>
+
+          <div class="table-wrap">
+            <table>
+              <thead>
+                <tr>
+                  <th>#</th>
+                  <th>Activity Name</th>
+                  <th>Activity ID</th>
+                  <th>Points</th>
+                </tr>
+              </thead>
+              <tbody id="activities-tbody">
+                <tr>
+                  <td colspan="4">
+                    <div class="empty-state">
+                      <div class="emoji">⚡</div>
+                      <p>No activities created yet</p>
+                    </div>
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div id="toast-container"></div>
+
+  <script src="../js/utils.js"></script>
+  <script type="module" src="../js/activities.js"></script>
+</body>
+</html>
