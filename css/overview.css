@@ -60,3 +60,23 @@
 @media (max-width: 900px) {
   .two-col { grid-template-columns: 1fr; }
 }
+
+
+.sidebar-logo-img
+{
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 80%;
+  height: 80%;
+}
+.sidebar-logo-icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background-color: var(--light);
+  width: 55px;
+  height: 55px;
+  
+  
+}

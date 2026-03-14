@@ -59,15 +59,24 @@
   margin-bottom: 32px;
 }
 .login-logo-icon {
-  width: 44px;
-  height: 44px;
-  background: var(--blue);
+  width: 50px;
+  height: 50px;
+  background: var(--light);
   border-radius: 10px;
   display: flex;
   align-items: center;
   justify-content: center;
   font-size: 22px;
   flex-shrink: 0;
+}
+.login-logo-img
+{
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 80%;
+  height: 80%;
+ 
 }
 .login-logo-text h1 {
   font-size: 18px;
