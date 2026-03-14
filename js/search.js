@@ -1,8 +1,8 @@
-import { requireAuth, logout } from "../firebase/auth-guard.js";
+import { requireAuth, logout } from "../firebase1/auth-guard.js";
 import {
   loadMembers,
   loadAssignments
-} from "../firebase/firestore-service.js";
+} from "../firebase1/firestore-service.js";
 
 (async function () {
   "use strict";

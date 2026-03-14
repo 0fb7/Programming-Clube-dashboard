@@ -1,5 +1,5 @@
-import { requireAuth, logout } from "../firebase/auth-guard.js";
-import { db } from "../firebase/firebase-config.js";
+import { requireAuth, logout } from "../firebase1/auth-guard.js";
+import { db } from "../firebase1/firebase-config.js";
 import {
   collection,
   getDocs
