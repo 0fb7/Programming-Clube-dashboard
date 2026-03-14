@@ -1,4 +1,9 @@
 import { requireAuth, logout } from "../firebase/auth-guard.js";
+import { db } from "../firebase/firebase-config.js";
+import {
+  collection,
+  getDocs
+} from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
 import {
   loadMembers,
   addMember,
@@ -13,9 +18,20 @@ import {
   Utils.initSidebarUser();
 
   document.getElementById('logout-btn')?.addEventListener('click', logout);
-  document.getElementById('add-student-btn')?.addEventListener('click', addStudent);
-  document.getElementById('clear-student-btn')?.addEventListener('click', clearForm);
   document.getElementById('student-search')?.addEventListener('input', e => renderTable(e.target.value));
+
+  const formCard = document.getElementById('students-form-card');
+  const addBtn = document.getElementById('add-student-btn');
+  const clearBtn = document.getElementById('clear-student-btn');
+  const committeeHeadCell = document.getElementById('committee-head-cell');
+
+  if (profile.role === 'manager') {
+    if (formCard) formCard.style.display = 'none';
+    if (committeeHeadCell) committeeHeadCell.style.display = '';
+  } else {
+    addBtn?.addEventListener('click', addStudent);
+    clearBtn?.addEventListener('click', clearForm);
+  }
 
   await renderTable();
 
@@ -37,10 +53,7 @@ import {
     if (!gender) { Utils.showFieldError('s-gender', 'err-s-gender'); valid = false; }
     if (!valid) return;
 
-    const committeeId =
-      profile.role === 'manager'
-        ? (Utils.val('s-committee') || 'committee1')
-        : profile.committeeId;
+    const committeeId = profile.committeeId;
 
     const exists = await memberPhoneExists(committeeId, phone);
     if (exists) {
@@ -51,13 +64,7 @@ import {
 
     await addMember(
       committeeId,
-      {
-        fullName,
-        phone,
-        major,
-        level,
-        gender
-      },
+      { fullName, phone, major, level, gender },
       profile.uid
     );
 
@@ -73,9 +80,10 @@ import {
 
     const committeeId = profile.role === 'manager' ? null : profile.committeeId;
 
-    const [members, assignments] = await Promise.all([
+    const [members, assignments, committeesMap] = await Promise.all([
       loadMembers(committeeId),
-      loadAssignments(committeeId)
+      loadAssignments(committeeId),
+      loadCommitteesMap()
     ]);
 
     const normalizedFilter = filter.trim().toLowerCase();
@@ -93,8 +101,10 @@ import {
 
     if (!tbody) return;
 
+    const colspan = profile.role === 'manager' ? 8 : 7;
+
     if (!list.length) {
-      tbody.innerHTML = `<tr><td colspan="7">${emptyState('📭', normalizedFilter ? 'No students match your search' : 'No students added yet')}</td></tr>`;
+      tbody.innerHTML = `<tr><td colspan="${colspan}">${emptyState('📭', normalizedFilter ? 'No students match your search' : 'No students added yet')}</td></tr>`;
       return;
     }
 
@@ -102,6 +112,10 @@ import {
       const pts = assignments
         .filter(a => a.memberId === m.id)
         .reduce((sum, a) => sum + Number(a.points || 0), 0);
+
+      const committeeCell = profile.role === 'manager'
+        ? `<td><span class="badge badge-green">${escapeHtml(committeesMap[m.committeeId] || m.committeeId || '-')}</span></td>`
+        : '';
 
       return `
         <tr>
@@ -111,10 +125,21 @@ import {
           <td>${escapeHtml(m.major || '')}</td>
           <td><span class="badge badge-blue">${escapeHtml(m.level || '')}</span></td>
           <td><span class="badge ${(m.gender || '') === 'Male' ? 'badge-sky' : 'badge-amber'}">${escapeHtml(m.gender || '')}</span></td>
+          ${committeeCell}
           <td><span class="pts-pill">${pts} pts</span></td>
         </tr>
       `;
     }).join('');
+  }
+
+  async function loadCommitteesMap() {
+    const snap = await getDocs(collection(db, "committees"));
+    const map = {};
+    snap.forEach(doc => {
+      const data = doc.data();
+      map[data.committeeId || doc.id] = data.name || data.committeeId || doc.id;
+    });
+    return map;
   }
 
   function clearForm() {

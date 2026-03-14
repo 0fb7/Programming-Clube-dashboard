@@ -1,4 +1,9 @@
 import { requireAuth, logout } from "../firebase/auth-guard.js";
+import { db } from "../firebase/firebase-config.js";
+import {
+  collection,
+  getDocs
+} from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
 import { loadLeaderboard } from "../firebase/firestore-service.js";
 
 (async function () {
@@ -16,7 +21,11 @@ import { loadLeaderboard } from "../firebase/firestore-service.js";
     if (!container) return;
 
     const committeeId = profile.role === 'manager' ? null : profile.committeeId;
-    const list = await loadLeaderboard(committeeId);
+
+    const [list, committeesMap] = await Promise.all([
+      loadLeaderboard(committeeId),
+      loadCommitteesMap()
+    ]);
 
     if (!list.length) {
       container.innerHTML = `
@@ -40,12 +49,19 @@ import { loadLeaderboard } from "../firebase/firestore-service.js";
       const pct = Math.round((Number(s.totalPoints || 0) / maxPts) * 100);
       const assignmentCount = Number(s.assignmentCount || 0);
 
+      const committeeLine = profile.role === 'manager'
+        ? `<div class="lb-committee" style="font-size:12px;color:rgba(232,232,234,.55);margin-top:2px">
+             🏢 ${escapeHtml(committeesMap[s.committeeId] || s.committeeId || '-')}
+           </div>`
+        : '';
+
       return `
         <div class="leaderboard-item">
           <div class="rank ${rankClass}">${rankLabel}</div>
           <div class="lb-info">
             <div class="lb-name">${escapeHtml(s.fullName || '')}</div>
             <div class="lb-meta">${escapeHtml(s.major || '')} · ${escapeHtml(s.level || '')} · ${escapeHtml(s.gender || '')}</div>
+            ${committeeLine}
             <div class="lb-progress progress-wrap">
               <div class="progress-bar ${i === 0 ? '' : 'sky'}" style="width:${pct}%"></div>
             </div>
@@ -57,6 +73,16 @@ import { loadLeaderboard } from "../firebase/firestore-service.js";
         </div>
       `;
     }).join('');
+  }
+
+  async function loadCommitteesMap() {
+    const snap = await getDocs(collection(db, "committees"));
+    const map = {};
+    snap.forEach(doc => {
+      const data = doc.data();
+      map[data.committeeId || doc.id] = data.name || data.committeeId || doc.id;
+    });
+    return map;
   }
 
   function escapeHtml(value) {

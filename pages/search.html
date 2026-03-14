@@ -8,7 +8,9 @@
   <link rel="stylesheet" href="../css/dashboard.css" />
 </head>
 <body>
+
   <div class="app-shell">
+
     <aside class="sidebar">
       <a class="sidebar-logo" href="overview.html">
         <div class="sidebar-logo-icon">💻</div>
@@ -20,16 +22,28 @@
 
       <nav class="sidebar-nav">
         <span class="nav-label">Main</span>
-        <a class="nav-item" href="overview.html"><span class="icon">🏠</span><span>Overview</span></a>
+        <a class="nav-item" href="overview.html">
+          <span class="icon">🏠</span><span>Overview</span>
+        </a>
 
         <span class="nav-label">Management</span>
-        <a class="nav-item" href="students.html"><span class="icon">👨‍💻</span><span>Students</span></a>
-        <a class="nav-item" href="activities.html"><span class="icon">⚡</span><span>Activities</span></a>
-        <a class="nav-item" href="assignments.html"><span class="icon">📋</span><span>Assignments</span></a>
+        <a class="nav-item" href="students.html">
+          <span class="icon">👨‍💻</span><span>Students</span>
+        </a>
+        <a class="nav-item" href="activities.html">
+          <span class="icon">⚡</span><span>Activities</span>
+        </a>
+        <a class="nav-item" href="assignments.html">
+          <span class="icon">📋</span><span>Assignments</span>
+        </a>
 
         <span class="nav-label">Insights</span>
-        <a class="nav-item" href="leaderboard.html"><span class="icon">🏆</span><span>Leaderboard</span></a>
-        <a class="nav-item active" href="search.html"><span class="icon">🔍</span><span>Search</span></a>
+        <a class="nav-item" href="leaderboard.html">
+          <span class="icon">🏆</span><span>Leaderboard</span>
+        </a>
+        <a class="nav-item active" href="search.html">
+          <span class="icon">🔍</span><span>Search</span>
+        </a>
       </nav>
 
       <div class="sidebar-footer">
@@ -40,11 +54,14 @@
             <span>Administrator</span>
           </div>
         </div>
-        <button class="btn btn-danger" style="width:100%" id="logout-btn">🚪 <span>Sign Out</span></button>
+        <button class="btn btn-danger" style="width:100%" id="logout-btn">
+          🚪 <span>Sign Out</span>
+        </button>
       </div>
     </aside>
 
     <div class="main-content">
+
       <div class="topbar">
         <div class="topbar-title">
           <h2>Search</h2>
@@ -53,6 +70,7 @@
       </div>
 
       <div class="page-content">
+
         <div class="card">
           <div class="card-header">
             <div>
@@ -63,7 +81,12 @@
 
           <div class="search-bar">
             <span class="search-icon">🔍</span>
-            <input type="text" id="global-search" placeholder="Type a student name or phone number…" autofocus />
+            <input
+              type="text"
+              id="global-search"
+              placeholder="Type a student name or phone number…"
+              autofocus
+            />
           </div>
 
           <div id="search-results">
@@ -73,6 +96,7 @@
             </div>
           </div>
         </div>
+
       </div>
     </div>
   </div>

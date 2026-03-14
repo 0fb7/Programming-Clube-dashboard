@@ -53,7 +53,7 @@
       </div>
 
       <div class="page-content">
-        <div class="card">
+        <div class="card" id="activities-form-card">
           <div class="card-header">
             <div>
               <div class="card-title">Create New Activity</div>
@@ -104,12 +104,13 @@
                   <th>#</th>
                   <th>Activity Name</th>
                   <th>Activity ID</th>
+                  <th id="committee-head-cell" style="display:none">Committee</th>
                   <th>Points</th>
                 </tr>
               </thead>
               <tbody id="activities-tbody">
                 <tr>
-                  <td colspan="4">
+                  <td colspan="5">
                     <div class="empty-state">
                       <div class="emoji">⚡</div>
                       <p>No activities created yet</p>
@@ -120,6 +121,7 @@
             </table>
           </div>
         </div>
+
       </div>
     </div>
   </div>

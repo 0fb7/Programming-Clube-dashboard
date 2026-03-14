@@ -54,6 +54,23 @@
       </div>
 
       <div class="page-content">
+
+        <div class="card" id="manager-filter-card" style="display:none">
+          <div class="card-header">
+            <div>
+              <div class="card-title">Committee Filter</div>
+              <div class="card-subtitle">View all committees or focus on one committee</div>
+            </div>
+          </div>
+
+          <div class="form-group" style="max-width:360px">
+            <label for="overview-committee-filter">Select Scope</label>
+            <select class="form-control" id="overview-committee-filter">
+              <option value="all">All Committees</option>
+            </select>
+          </div>
+        </div>
+
         <div class="stats-grid">
           <div class="stat-card">
             <div class="stat-icon">👨‍💻</div>
@@ -74,6 +91,21 @@
             <div class="stat-icon">🏆</div>
             <div class="stat-value" id="stat-pts">0</div>
             <div class="stat-label">Points Awarded</div>
+          </div>
+        </div>
+
+        <div class="card" id="committees-summary-section" style="display:none">
+          <div class="card-header">
+            <div>
+              <div class="card-title">Committees Summary</div>
+              <div class="card-subtitle">Overview of all committees</div>
+            </div>
+          </div>
+          <div class="stats-grid" id="committees-summary-grid">
+            <div class="empty-state">
+              <div class="emoji">🏢</div>
+              <p>No committees found</p>
+            </div>
           </div>
         </div>
 
@@ -102,6 +134,7 @@
             </div>
           </div>
         </div>
+
       </div>
     </div>
   </div>
