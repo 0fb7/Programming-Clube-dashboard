@@ -1,4 +1,4 @@
-import { auth, db } from "./firebase-config.js";
+import { auth, database } from "./firebase-config.js";
 import {
   onAuthStateChanged,
   signOut
@@ -17,7 +17,7 @@ export function requireAuth() {
       }
 
       try {
-        const ref = doc(db, "users", firebaseUser.uid);
+        const ref = doc(database, "users", firebaseUser.uid);
         const snap = await getDoc(ref);
 
         if (!snap.exists()) {

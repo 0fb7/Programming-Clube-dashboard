@@ -1,10 +1,10 @@
 import { requireAuth, logout } from "../firebase1/auth-guard.js";
-import { db } from "../firebase1/firebase-config.js";
+import { database } from "../firebase1/firebase-config.js";
 import {
   collection,
   getDocs
 } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
-import { loadOverviewData } from "../firebase/firestore-service.js";
+import { loadOverviewData } from "../firebase1/firestore-service.js";
 
 (async function () {
   "use strict";
@@ -162,7 +162,7 @@ import { loadOverviewData } from "../firebase/firestore-service.js";
   }
 
   async function loadCommitteesMap() {
-    const snap = await getDocs(collection(db, "committees"));
+    const snap = await getDocs(collection(database, "committees"));
     const map = {};
     snap.forEach(doc => {
       const data = doc.data();

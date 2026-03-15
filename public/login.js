@@ -1,4 +1,4 @@
-import { auth, db } from "./firebase1/firebase-config.js";
+import { auth, database } from "./firebase1/firebase-config.js";
 import { signInWithEmailAndPassword } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
 import { doc, getDoc } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
 
@@ -20,7 +20,7 @@ loginBtn.addEventListener("click", async () => {
     const credential = await signInWithEmailAndPassword(auth, email, password);
     const uid = credential.user.uid;
 
-    const userSnap = await getDoc(doc(db, "users", uid));
+    const userSnap = await getDoc(doc(database, "users", uid));
     if (!userSnap.exists()) {
       showError("Account profile not found in Firestore.");
       return;

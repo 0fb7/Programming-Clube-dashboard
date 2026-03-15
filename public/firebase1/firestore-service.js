@@ -1,4 +1,4 @@
-import { db } from "./firebase-config.js";
+import { database } from "./firebase-config.js";
 import {
   collection,
   getDocs,
@@ -12,7 +12,7 @@ import {
    MEMBERS
 ========================= */
 export async function loadMembers(committeeId = null) {
-  const ref = collection(db, "members");
+  const ref = collection(database, "members");
   const q = committeeId
     ? query(ref, where("committeeId", "==", committeeId))
     : ref;
@@ -23,17 +23,17 @@ export async function loadMembers(committeeId = null) {
     .sort((a, b) => String(a.fullName || "").localeCompare(String(b.fullName || "")));
 }
 
-export async function addMember(committeeId, data, createdBy) {
-  return await addDoc(collection(db, "members"), {
+export async function addMember(committeeId, data, createdatabasey) {
+  return await addDoc(collection(database, "members"), {
     ...data,
     committeeId,
-    createdBy,
+    createdatabasey,
     createdAt: serverTimestamp()
   });
 }
 
 export async function memberPhoneExists(committeeId, phone) {
-  const ref = collection(db, "members");
+  const ref = collection(database, "members");
   const q = query(
     ref,
     where("committeeId", "==", committeeId),
@@ -48,7 +48,7 @@ export async function memberPhoneExists(committeeId, phone) {
    ACTIVITIES
 ========================= */
 export async function loadActivities(committeeId = null) {
-  const ref = collection(db, "activities");
+  const ref = collection(database, "activities");
   const q = committeeId
     ? query(ref, where("committeeId", "==", committeeId))
     : ref;
@@ -59,17 +59,17 @@ export async function loadActivities(committeeId = null) {
     .sort((a, b) => String(a.name || "").localeCompare(String(b.name || "")));
 }
 
-export async function addActivity(committeeId, data, createdBy) {
-  return await addDoc(collection(db, "activities"), {
+export async function addActivity(committeeId, data, createdatabasey) {
+  return await addDoc(collection(database, "activities"), {
     ...data,
     committeeId,
-    createdBy,
+    createdatabasey,
     createdAt: serverTimestamp()
   });
 }
 
 export async function activityCodeExists(committeeId, activityCode) {
-  const ref = collection(db, "activities");
+  const ref = collection(database, "activities");
   const q = query(
     ref,
     where("committeeId", "==", committeeId),
@@ -84,7 +84,7 @@ export async function activityCodeExists(committeeId, activityCode) {
    ASSIGNMENTS
 ========================= */
 export async function loadAssignments(committeeId = null) {
-  const ref = collection(db, "assignments");
+  const ref = collection(database, "assignments");
   const q = committeeId
     ? query(ref, where("committeeId", "==", committeeId))
     : ref;
@@ -95,16 +95,16 @@ export async function loadAssignments(committeeId = null) {
     .map(doc => ({ id: doc.id, ...doc.data() }))
     .sort((a, b) => {
       const da = toMillis(a.assignedAt || a.createdAt);
-      const dbb = toMillis(b.assignedAt || b.createdAt);
-      return dbb - da;
+      const databaseb = toMillis(b.assignedAt || b.createdAt);
+      return databaseb - da;
     });
 }
 
-export async function addAssignment(committeeId, data, assignedBy) {
-  return await addDoc(collection(db, "assignments"), {
+export async function addAssignment(committeeId, data, assignedatabasey) {
+  return await addDoc(collection(database, "assignments"), {
     ...data,
     committeeId,
-    assignedBy,
+    assignedatabasey,
     assignedAt: serverTimestamp()
   });
 }

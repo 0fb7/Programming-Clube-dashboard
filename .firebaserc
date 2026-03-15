@@ -1,5 +1,16 @@
 {
   "projects": {
-    "default": "gen-lang-client-0088964216"
-  }
+    "default": "gen-lang-client-0088964216",
+    "new": "programming-club-fixed"
+  },
+  "targets": {
+    "gen-lang-client-0088964216": {
+      "hosting": {
+        "app": [
+          "gen-lang-client-0088964216"
+        ]
+      }
+    }
+  },
+  "etags": {}
 }
