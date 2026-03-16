@@ -126,7 +126,7 @@ import {
           <td><span class="badge badge-blue">${escapeHtml(m.level || '')}</span></td>
           <td><span class="badge ${(m.gender || '') === 'Male' ? 'badge-sky' : 'badge-amber'}">${escapeHtml(m.gender || '')}</span></td>
           ${committeeCell}
-          <td><span class="pts-pill">${pts} pts</span></td>
+         
         </tr>
       `;
     }).join('');

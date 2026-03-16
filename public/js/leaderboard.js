@@ -36,26 +36,37 @@ import { loadLeaderboard } from "../firebase1/firestore-service.js";
       return;
     }
 
-    const maxPts = Number(list[0].totalPoints || 0) || 1;
-    const medals = ['🥇', '🥈', '🥉'];
+//Extract the unique points without duplicates and sort them from largest to smalles
+const uniquePoints = [...new Set(list.map(s => Number(s.totalPoints || 0)))].sort((a, b) => b - a);
 
-    container.innerHTML = list.map((s, i) => {
-      const rankClass =
-        i === 0 ? 'rank-1' :
-        i === 1 ? 'rank-2' :
-        i === 2 ? 'rank-3' : 'rank-other';
+const maxPts = uniquePoints[0] || 1; 
+const medals = ['🥇', '🥈', '🥉'];
 
-      const rankLabel = i < 3 ? medals[i] : i + 1;
-      const pct = Math.round((Number(s.totalPoints || 0) / maxPts) * 100);
-      const assignmentCount = Number(s.assignmentCount || 0);
+container.innerHTML = list.map((s, i) => {
+    const sPts = Number(s.totalPoints || 0);
+    
+     
+    const actualRank = uniquePoints.indexOf(sPts) + 1;
 
-      const committeeLine = profile.role === 'manager'
+    // Select the top class color on the common center
+    const rankClass =
+        actualRank === 1 ? 'rank-1' :
+        actualRank === 2 ? 'rank-2' :
+        actualRank === 3 ? 'rank-3' : 'rank-other';
+
+    // Medal awarded based on joint ranking
+    const rankLabel = actualRank <= 3 ? medals[actualRank - 1] : actualRank;
+    
+    const pct = Math.round((sPts / maxPts) * 100);
+    const assignmentCount = Number(s.assignmentCount || 0);
+
+    const committeeLine = profile.role === 'manager'
         ? `<div class="lb-committee" style="font-size:12px;color:rgba(232,232,234,.55);margin-top:2px">
-             🏢 ${escapeHtml(committeesMap[s.committeeId] || s.committeeId || '-')}
+              🏢 ${escapeHtml(committeesMap[s.committeeId] || s.committeeId || '-')}
            </div>`
         : '';
 
-      return `
+    return `
         <div class="leaderboard-item">
           <div class="rank ${rankClass}">${rankLabel}</div>
           <div class="lb-info">
@@ -63,16 +74,16 @@ import { loadLeaderboard } from "../firebase1/firestore-service.js";
             <div class="lb-meta">${escapeHtml(s.major || '')} · ${escapeHtml(s.level || '')} · ${escapeHtml(s.gender || '')}</div>
             ${committeeLine}
             <div class="lb-progress progress-wrap">
-              <div class="progress-bar ${i === 0 ? '' : 'sky'}" style="width:${pct}%"></div>
+              <div class="progress-bar ${actualRank === 1 ? '' : 'sky'}" style="width:${pct}%"></div>
             </div>
           </div>
           <div class="lb-pts-col">
-            <div class="lb-pts">${Number(s.totalPoints || 0)}<small> pts</small></div>
+            <div class="lb-pts">${sPts}<small> pts</small></div>
             <div class="lb-asgn-count">${assignmentCount} assignment${assignmentCount !== 1 ? 's' : ''}</div>
           </div>
         </div>
-      `;
-    }).join('');
+    `;
+}).join('');;
   }
 
   async function loadCommitteesMap() {
