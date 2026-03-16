@@ -7,6 +7,7 @@ import {
 import {
   loadActivities,
   addActivity,
+  deleteActivity,
   activityCodeExists
 } from "../firebase1/firestore-service.js";
 
@@ -22,6 +23,31 @@ import {
   const addBtn = document.getElementById('add-activity-btn');
   const clearBtn = document.getElementById('clear-activity-btn');
   const committeeHeadCell = document.getElementById('committee-head-cell');
+
+  const tbody = document.getElementById('activities-tbody');
+
+tbody?.addEventListener('click', async (e) => {
+  const btn = e.target.closest('.delete-activity-btn');
+  if (!btn) return;
+
+  const activityId = btn.dataset.id;
+  const activityName = btn.dataset.name || 'this activity';
+
+  const ok = confirm(`Are you sure you want to delete ${activityName}?`);
+  if (!ok) return;
+
+  try {
+    btn.disabled = true;
+    await deleteActivity(activityId);
+    await renderTable();
+    Utils.toast('Activity deleted', 'success');
+  } catch (error) {
+    console.error(error);
+    Utils.toast('Failed to delete activity', 'error');
+  } finally {
+    btn.disabled = false;
+  }
+});
 
   if (profile.role === 'manager') {
     if (formCard) formCard.style.display = 'none';
@@ -96,7 +122,7 @@ import {
 
     if (!tbody) return;
 
-    const colspan = profile.role === 'manager' ? 5 : 4;
+    const colspan = profile.role === 'manager' ? 6 : 5;
 
     if (!activities.length) {
       tbody.innerHTML = `<tr><td colspan="${colspan}">${emptyState('⚡', 'No activities created yet')}</td></tr>`;
@@ -109,14 +135,44 @@ import {
         : '';
 
       return `
-        <tr>
-          <td class="row-index">${i + 1}</td>
-          <td><strong>${escapeHtml(a.name || '')}</strong></td>
-          <td><code style="background:rgba(255,255,255,.06);padding:2px 8px;border-radius:5px;font-size:12px">${escapeHtml(a.activityCode || '')}</code></td>
-          ${committeeCell}
-          <td><span class="pts-pill">${Number(a.points || 0)} pts</span></td>
-        </tr>
-      `;
+  <tr>
+    <td class="row-index">${i + 1}</td>
+    <td><strong>${escapeHtml(a.name || '')}</strong></td>
+    <td><code style="background:rgba(255,255,255,.06);padding:2px 8px;border-radius:5px;font-size:12px">${escapeHtml(a.activityCode || '')}</code></td>
+    ${committeeCell}
+    <td><span class="pts-pill">${Number(a.points || 0)} pts</span></td>
+    <td style="text-align:center;">
+      <button
+        class="delete-activity-btn"
+        type="button"
+        data-id="${escapeHtml(a.id || '')}"
+        data-name="${escapeHtml(a.name || 'Activity')}"
+        title="Delete activity"
+        aria-label="Delete activity"
+        style="
+          width: 34px;
+          height: 34px;
+          display: inline-flex;
+          align-items: center;
+          justify-content: center;
+          background: transparent;
+          border: 1px solid rgba(255,255,255,0.08);
+          border-radius: 10px;
+          cursor: pointer;
+          transition: 0.2s ease;
+        "
+      >
+        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#9CA3AF" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M3 6h18"/>
+          <path d="M8 6V4h8v2"/>
+          <path d="M19 6l-1 14H6L5 6"/>
+          <path d="M10 11v6"/>
+          <path d="M14 11v6"/>
+        </svg>
+      </button>
+    </td>
+  </tr>
+`;
     }).join('');
   }
 

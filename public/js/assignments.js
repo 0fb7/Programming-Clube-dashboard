@@ -8,7 +8,8 @@ import {
   loadMembers,
   loadActivities,
   loadAssignments,
-  addAssignment
+  addAssignment,
+  deleteAssignment
 } from "../firebase1/firestore-service.js";
 
 (async function () {
@@ -23,6 +24,33 @@ import {
   const saveBtn = document.getElementById('save-assignment-btn');
   const clearBtn = document.getElementById('clear-assignment-btn');
   const committeeHeadCell = document.getElementById('committee-head-cell');
+
+  const tbody = document.getElementById('assignments-tbody');
+  tbody?.addEventListener('click', async (e) => {
+    const btn = e.target.closest('.delete-assignment-btn');
+    if (!btn) return;
+
+    const assignmentId = btn.dataset.id;
+    const memberName = btn.dataset.member || 'this record';
+    const activityName = btn.dataset.activity || '';
+
+    const label = activityName ? `${memberName} / ${activityName}` : memberName;
+    const ok = confirm(`Are you sure you want to delete ${label}?`);
+    if (!ok) return;
+
+    try {
+      btn.disabled = true;
+      await deleteAssignment(assignmentId);
+      await renderTable();
+      if (profile.role !== 'manager') {
+        await populateDropdowns();
+      }
+      Utils.toast('Assignment deleted', 'success');
+    } catch (error) {
+      console.error(error);
+      Utils.toast('Failed to delete assignment', 'error');
+    }
+  });
 
   if (profile.role === 'manager') {
     if (formCard) formCard.style.display = 'none';
@@ -139,7 +167,7 @@ import {
 
     if (!tbody) return;
 
-    const colspan = profile.role === 'manager' ? 7 : 6;
+    const colspan = profile.role === 'manager' ? 8 : 7;
 
     if (!assignments.length) {
       tbody.innerHTML = `<tr><td colspan="${colspan}">${emptyState('📋', 'No assignments recorded yet')}</td></tr>`;
@@ -157,10 +185,43 @@ import {
           <td class="row-index">${i + 1}</td>
           <td><strong>${escapeHtml(a.memberName || '')}</strong></td>
           <td>${escapeHtml(a.activityName || '')}</td>
-          ${committeeCell}
           <td><span class="pts-pill">${Number(a.points || 0)} pts</span></td>
           <td style="color:rgba(232,232,234,.55);font-size:12px">${escapeHtml(a.description || '—')}</td>
           <td style="color:rgba(232,232,234,.4);font-size:12px">${dateText}</td>
+          <td style="text-align:center;">
+            <button
+              class="delete-assignment-btn"
+              type="button"
+              data-id="${escapeHtml(a.id || '')}"
+              data-member="${escapeHtml(a.memberName || 'Record')}"
+              data-activity="${escapeHtml(a.activityName || '')}"
+              title="Delete assignment"
+              aria-label="Delete assignment"
+              style="
+                width: 34px;
+                height: 34px;
+                display: inline-flex;
+                align-items: center;
+                justify-content: center;
+                background: transparent;
+                border: 1px solid rgba(255,255,255,0.08);
+                border-radius: 10px;
+                cursor: pointer;
+                transition: 0.2s ease;
+              "
+              onmouseover="this.style.background='rgba(255,255,255,0.05)';this.style.borderColor='rgba(255,255,255,0.14)'"
+              onmouseout="this.style.background='transparent';this.style.borderColor='rgba(255,255,255,0.08)'"
+            >
+              <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#9CA3AF" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M3 6h18"/>
+                <path d="M8 6V4h8v2"/>
+                <path d="M19 6l-1 14H6L5 6"/>
+                <path d="M10 11v6"/>
+                <path d="M14 11v6"/>
+              </svg>
+            </button>
+          </td>
+          ${committeeCell}
         </tr>
       `;
     }).join('');

@@ -5,7 +5,9 @@ import {
   addDoc,
   query,
   where,
-  serverTimestamp
+  serverTimestamp,
+  doc,
+  deleteDoc
 } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
 
 /* =========================
@@ -30,6 +32,10 @@ export async function addMember(committeeId, data, createdatabasey) {
     createdatabasey,
     createdAt: serverTimestamp()
   });
+}
+
+export async function deleteMember(memberId) {
+  await deleteDoc(doc(database, "members", memberId));
 }
 
 export async function memberPhoneExists(committeeId, phone) {
@@ -66,6 +72,14 @@ export async function addActivity(committeeId, data, createdatabasey) {
     createdatabasey,
     createdAt: serverTimestamp()
   });
+}
+
+export async function deleteActivity(activityId) {
+  await deleteDoc(doc(database, "activities", activityId));
+}
+
+export async function deleteAssignment(assignmentId) {
+  await deleteDoc(doc(database, "assignments", assignmentId));
 }
 
 export async function activityCodeExists(committeeId, activityCode) {

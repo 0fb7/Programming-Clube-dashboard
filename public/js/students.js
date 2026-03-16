@@ -1,5 +1,5 @@
 import { requireAuth, logout } from "../firebase1/auth-guard.js";
-import { database} from "../firebase1/firebase-config.js";
+import { database } from "../firebase1/firebase-config.js";
 import {
   collection,
   getDocs
@@ -7,6 +7,7 @@ import {
 import {
   loadMembers,
   addMember,
+  deleteMember,
   memberPhoneExists,
   loadAssignments
 } from "../firebase1/firestore-service.js";
@@ -19,6 +20,28 @@ import {
 
   document.getElementById('logout-btn')?.addEventListener('click', logout);
   document.getElementById('student-search')?.addEventListener('input', e => renderTable(e.target.value));
+
+  const tbody = document.getElementById('students-tbody');
+  tbody?.addEventListener('click', async (e) => {
+    const btn = e.target.closest('.delete-student-btn');
+    if (!btn) return;
+
+    const memberId = btn.dataset.id;
+    const memberName = btn.dataset.name || 'this student';
+
+    const ok = confirm(`Are you sure you want to delete ${memberName}?`);
+    if (!ok) return;
+
+    try {
+      btn.disabled = true;
+      await deleteMember(memberId);
+      await renderTable(document.getElementById('student-search')?.value || '');
+      Utils.toast('Student deleted', 'success');
+    } catch (error) {
+      console.error(error);
+      Utils.toast('Failed to delete student', 'error');
+    }
+  });
 
   const formCard = document.getElementById('students-form-card');
   const addBtn = document.getElementById('add-student-btn');
@@ -101,7 +124,7 @@ import {
 
     if (!tbody) return;
 
-    const colspan = profile.role === 'manager' ? 8 : 7;
+    const colspan = profile.role === 'manager' ? 9 : 8;
 
     if (!list.length) {
       tbody.innerHTML = `<tr><td colspan="${colspan}">${emptyState('📭', normalizedFilter ? 'No students match your search' : 'No students added yet')}</td></tr>`;
@@ -109,26 +132,65 @@ import {
     }
 
     tbody.innerHTML = list.map((m, i) => {
-      const pts = assignments
-        .filter(a => a.memberId === m.id)
-        .reduce((sum, a) => sum + Number(a.points || 0), 0);
-
       const committeeCell = profile.role === 'manager'
         ? `<td><span class="badge badge-green">${escapeHtml(committeesMap[m.committeeId] || m.committeeId || '-')}</span></td>`
         : '';
 
       return `
-        <tr>
-          <td class="row-index">${i + 1}</td>
-          <td><strong>${escapeHtml(m.fullName || '')}</strong></td>
-          <td style="font-size:12px;color:rgba(232,232,234,.6)">${escapeHtml(m.phone || '')}</td>
-          <td>${escapeHtml(m.major || '')}</td>
-          <td><span class="badge badge-blue">${escapeHtml(m.level || '')}</span></td>
-          <td><span class="badge ${(m.gender || '') === 'Male' ? 'badge-sky' : 'badge-amber'}">${escapeHtml(m.gender || '')}</span></td>
-          ${committeeCell}
-         
-        </tr>
-      `;
+         <tr>
+    <td class="row-index">${i + 1}</td>
+    <td><strong>${escapeHtml(m.fullName || '')}</strong></td>
+    <td style="font-size:12px;color:rgba(232,232,234,.6)">${escapeHtml(m.phone || '')}</td>
+    <td>${escapeHtml(m.major || '')}</td>
+    <td><span class="badge badge-blue">${escapeHtml(m.level || '')}</span></td>
+    <td><span class="badge ${(m.gender || '') === 'Male' ? 'badge-sky' : 'badge-amber'}">${escapeHtml(m.gender || '')}</span></td>
+
+    <td style="text-align:center;">
+      <button
+        class="delete-student-btn"
+        type="button"
+        data-id="${escapeHtml(m.id || '')}"
+        data-name="${escapeHtml(m.fullName || 'Student')}"
+        title="Delete student"
+        aria-label="Delete student"
+        style="
+          width: 34px;
+          height: 34px;
+          display: inline-flex;
+          align-items: center;
+          justify-content: center;
+          background: transparent;
+          border: 1px solid rgba(255,255,255,0.08);
+          border-radius: 10px;
+          cursor: pointer;
+          transition: 0.2s ease;
+        "
+        onmouseover="this.style.background='rgba(255,255,255,0.05)';this.style.borderColor='rgba(255,255,255,0.14)'"
+        onmouseout="this.style.background='transparent';this.style.borderColor='rgba(255,255,255,0.08)'"
+      >
+        <svg
+          xmlns="http://www.w3.org/2000/svg"
+          width="16"
+          height="16"
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="#9CA3AF"
+          stroke-width="2"
+          stroke-linecap="round"
+          stroke-linejoin="round"
+        >
+          <path d="M3 6h18"/>
+          <path d="M8 6V4h8v2"/>
+          <path d="M19 6l-1 14H6L5 6"/>
+          <path d="M10 11v6"/>
+          <path d="M14 11v6"/>
+        </svg>
+      </button>
+    </td>
+
+    ${committeeCell}
+  </tr>
+`;
     }).join('');
   }
 
