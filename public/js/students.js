@@ -98,101 +98,105 @@ import {
   }
 
   async function renderTable(filter = '') {
-    const tbody = document.getElementById('students-tbody');
-    const countEl = document.getElementById('students-count-label');
+  const tbody = document.getElementById('students-tbody');
+  const countEl = document.getElementById('students-count-label');
 
-    const committeeId = profile.role === 'manager' ? null : profile.committeeId;
+  const committeeId = profile.role === 'manager' ? null : profile.committeeId;
 
-    const [members, assignments, committeesMap] = await Promise.all([
-      loadMembers(committeeId),
-      loadAssignments(committeeId),
-      loadCommitteesMap()
-    ]);
+  const [members, assignments, committeesMap] = await Promise.all([
+    loadMembers(committeeId),
+    loadAssignments(committeeId),
+    loadCommitteesMap()
+  ]);
 
-    const normalizedFilter = filter.trim().toLowerCase();
+  const normalizedFilter = filter.trim().toLowerCase();
 
-    const list = normalizedFilter
-      ? members.filter(m =>
-          (m.fullName || '').toLowerCase().includes(normalizedFilter) ||
-          (m.phone || '').includes(normalizedFilter)
-        )
-      : members;
+  const list = normalizedFilter
+    ? members.filter(m =>
+        (m.fullName || '').toLowerCase().includes(normalizedFilter) ||
+        (m.phone || '').includes(normalizedFilter)
+      )
+    : members;
 
-    if (countEl) {
-      countEl.textContent = `${members.length} student${members.length !== 1 ? 's' : ''} registered`;
-    }
-
-    if (!tbody) return;
-
-    const colspan = profile.role === 'manager' ? 9 : 8;
-
-    if (!list.length) {
-      tbody.innerHTML = `<tr><td colspan="${colspan}">${emptyState('📭', normalizedFilter ? 'No students match your search' : 'No students added yet')}</td></tr>`;
-      return;
-    }
-
-    tbody.innerHTML = list.map((m, i) => {
-      const committeeCell = profile.role === 'manager'
-        ? `<td><span class="badge badge-green">${escapeHtml(committeesMap[m.committeeId] || m.committeeId || '-')}</span></td>`
-        : '';
-
-      return `
-         <tr>
-    <td class="row-index">${i + 1}</td>
-    <td><strong>${escapeHtml(m.fullName || '')}</strong></td>
-    <td style="font-size:12px;color:rgba(232,232,234,.6)">${escapeHtml(m.phone || '')}</td>
-    <td>${escapeHtml(m.major || '')}</td>
-    <td><span class="badge badge-blue">${escapeHtml(m.level || '')}</span></td>
-    <td><span class="badge ${(m.gender || '') === 'Male' ? 'badge-sky' : 'badge-amber'}">${escapeHtml(m.gender || '')}</span></td>
-
-    <td style="text-align:center;">
-      <button
-        class="delete-student-btn"
-        type="button"
-        data-id="${escapeHtml(m.id || '')}"
-        data-name="${escapeHtml(m.fullName || 'Student')}"
-        title="Delete student"
-        aria-label="Delete student"
-        style="
-          width: 34px;
-          height: 34px;
-          display: inline-flex;
-          align-items: center;
-          justify-content: center;
-          background: transparent;
-          border: 1px solid rgba(255,255,255,0.08);
-          border-radius: 10px;
-          cursor: pointer;
-          transition: 0.2s ease;
-        "
-        onmouseover="this.style.background='rgba(255,255,255,0.05)';this.style.borderColor='rgba(255,255,255,0.14)'"
-        onmouseout="this.style.background='transparent';this.style.borderColor='rgba(255,255,255,0.08)'"
-      >
-        <svg
-          xmlns="http://www.w3.org/2000/svg"
-          width="16"
-          height="16"
-          viewBox="0 0 24 24"
-          fill="none"
-          stroke="#9CA3AF"
-          stroke-width="2"
-          stroke-linecap="round"
-          stroke-linejoin="round"
-        >
-          <path d="M3 6h18"/>
-          <path d="M8 6V4h8v2"/>
-          <path d="M19 6l-1 14H6L5 6"/>
-          <path d="M10 11v6"/>
-          <path d="M14 11v6"/>
-        </svg>
-      </button>
-    </td>
-
-    ${committeeCell}
-  </tr>
-`;
-    }).join('');
+  if (countEl) {
+    countEl.textContent = `${members.length} student${members.length !== 1 ? 's' : ''} registered`;
   }
+
+  if (!tbody) return;
+
+  const colspan = 8;
+
+  if (!list.length) {
+    tbody.innerHTML = `<tr><td colspan="${colspan}">${emptyState('📭', normalizedFilter ? 'No students match your search' : 'No students added yet')}</td></tr>`;
+    return;
+  }
+
+  tbody.innerHTML = list.map((m, i) => {
+    const committeeCell = profile.role === 'manager'
+      ? `<td><span class="badge badge-green">${escapeHtml(committeesMap[m.committeeId] || m.committeeId || '-')}</span></td>`
+      : '';
+
+    const deleteCell = profile.role !== 'manager'
+      ? `
+        <td style="text-align:center;">
+          <button
+            class="delete-student-btn"
+            type="button"
+            data-id="${escapeHtml(m.id || '')}"
+            data-name="${escapeHtml(m.fullName || 'Student')}"
+            title="Delete student"
+            aria-label="Delete student"
+            style="
+              width: 34px;
+              height: 34px;
+              display: inline-flex;
+              align-items: center;
+              justify-content: center;
+              background: transparent;
+              border: 1px solid rgba(255,255,255,0.08);
+              border-radius: 10px;
+              cursor: pointer;
+              transition: 0.2s ease;
+            "
+            onmouseover="this.style.background='rgba(255,255,255,0.05)';this.style.borderColor='rgba(255,255,255,0.14)'"
+            onmouseout="this.style.background='transparent';this.style.borderColor='rgba(255,255,255,0.08)'"
+          >
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              width="16"
+              height="16"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="#9CA3AF"
+              stroke-width="2"
+              stroke-linecap="round"
+              stroke-linejoin="round"
+            >
+              <path d="M3 6h18"/>
+              <path d="M8 6V4h8v2"/>
+              <path d="M19 6l-1 14H6L5 6"/>
+              <path d="M10 11v6"/>
+              <path d="M14 11v6"/>
+            </svg>
+          </button>
+        </td>
+      `
+      : '';
+
+    return `
+      <tr>
+        <td class="row-index">${i + 1}</td>
+        <td><strong>${escapeHtml(m.fullName || '')}</strong></td>
+        <td style="font-size:12px;color:rgba(232,232,234,.6)">${escapeHtml(m.phone || '')}</td>
+        <td>${escapeHtml(m.major || '')}</td>
+        <td><span class="badge badge-blue">${escapeHtml(m.level || '')}</span></td>
+        <td><span class="badge ${(m.gender || '') === 'Male' ? 'badge-sky' : 'badge-amber'}">${escapeHtml(m.gender || '')}</span></td>
+        ${deleteCell}
+        ${committeeCell}
+      </tr>
+    `;
+  }).join('');
+}
 
   async function loadCommitteesMap() {
     const snap = await getDocs(collection(database, "committees"));

@@ -122,58 +122,64 @@ tbody?.addEventListener('click', async (e) => {
 
     if (!tbody) return;
 
-    const colspan = profile.role === 'manager' ? 6 : 5;
+    const colspan = 5;
 
     if (!activities.length) {
       tbody.innerHTML = `<tr><td colspan="${colspan}">${emptyState('⚡', 'No activities created yet')}</td></tr>`;
       return;
     }
 
-    tbody.innerHTML = activities.map((a, i) => {
-      const committeeCell = profile.role === 'manager'
-        ? `<td><span class="badge badge-green">${escapeHtml(committeesMap[a.committeeId] || a.committeeId || '-')}</span></td>`
-        : '';
+   tbody.innerHTML = activities.map((a, i) => {
+  const committeeCell = profile.role === 'manager'
+    ? `<td><span class="badge badge-green">${escapeHtml(committeesMap[a.committeeId] || a.committeeId || '-')}</span></td>`
+    : '';
 
-      return `
-  <tr>
-    <td class="row-index">${i + 1}</td>
-    <td><strong>${escapeHtml(a.name || '')}</strong></td>
-    <td><code style="background:rgba(255,255,255,.06);padding:2px 8px;border-radius:5px;font-size:12px">${escapeHtml(a.activityCode || '')}</code></td>
-    ${committeeCell}
-    <td><span class="pts-pill">${Number(a.points || 0)} pts</span></td>
-    <td style="text-align:center;">
-      <button
-        class="delete-activity-btn"
-        type="button"
-        data-id="${escapeHtml(a.id || '')}"
-        data-name="${escapeHtml(a.name || 'Activity')}"
-        title="Delete activity"
-        aria-label="Delete activity"
-        style="
-          width: 34px;
-          height: 34px;
-          display: inline-flex;
-          align-items: center;
-          justify-content: center;
-          background: transparent;
-          border: 1px solid rgba(255,255,255,0.08);
-          border-radius: 10px;
-          cursor: pointer;
-          transition: 0.2s ease;
-        "
-      >
-        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#9CA3AF" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-          <path d="M3 6h18"/>
-          <path d="M8 6V4h8v2"/>
-          <path d="M19 6l-1 14H6L5 6"/>
-          <path d="M10 11v6"/>
-          <path d="M14 11v6"/>
-        </svg>
-      </button>
-    </td>
-  </tr>
-`;
-    }).join('');
+  const deleteCell = profile.role !== 'manager'
+    ? `
+      <td style="text-align:center;">
+        <button
+          class="delete-activity-btn"
+          type="button"
+          data-id="${escapeHtml(a.id || '')}"
+          data-name="${escapeHtml(a.name || 'Activity')}"
+          title="Delete activity"
+          aria-label="Delete activity"
+          style="
+            width: 34px;
+            height: 34px;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            background: transparent;
+            border: 1px solid rgba(255,255,255,0.08);
+            border-radius: 10px;
+            cursor: pointer;
+            transition: 0.2s ease;
+          "
+        >
+          <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#9CA3AF" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M3 6h18"/>
+            <path d="M8 6V4h8v2"/>
+            <path d="M19 6l-1 14H6L5 6"/>
+            <path d="M10 11v6"/>
+            <path d="M14 11v6"/>
+          </svg>
+        </button>
+      </td>
+    `
+    : '';
+
+  return `
+    <tr>
+      <td class="row-index">${i + 1}</td>
+      <td><strong>${escapeHtml(a.name || '')}</strong></td>
+      <td><code style="background:rgba(255,255,255,.06);padding:2px 8px;border-radius:5px;font-size:12px">${escapeHtml(a.activityCode || '')}</code></td>
+      ${committeeCell}
+      <td><span class="pts-pill">${Number(a.points || 0)} pts</span></td>
+      ${deleteCell}
+    </tr>
+  `;
+}).join('');
   }
 
   async function loadCommitteesMap() {
