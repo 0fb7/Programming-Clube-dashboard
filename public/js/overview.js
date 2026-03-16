@@ -114,7 +114,7 @@ import { loadOverviewData } from "../firebase1/firestore-service.js";
       <div class="activity-feed-item">
         <div class="af-dot"></div>
         <div class="af-text">
-          <strong>${escapeHtml(a.memberName || "")}</strong> — ${escapeHtml(a.activityName || "")}
+          <strong>${escapeHtml(a.memberName || "")}</strong> - ${escapeHtml(a.activityName || "")}
           ${profile.role === "manager"
             ? `<br><small style="color:rgba(232,232,234,.4)">🏢 ${escapeHtml(committeesMap[a.committeeId] || a.committeeId || "-")}</small>`
             : ""}
@@ -125,19 +125,27 @@ import { loadOverviewData } from "../firebase1/firestore-service.js";
   }
 
   function renderTopStudents(list) {
-    const container = document.getElementById("overview-top-students");
-    if (!container) return;
+  const container = document.getElementById("overview-top-students");
+  if (!container) return;
 
-    const medals = ["🥇", "🥈", "🥉"];
+  const medals = ["🥇", "🥈", "🥉"];
 
-    if (!list.length) {
-      container.innerHTML = emptyState("🏆", "No data yet");
-      return;
-    }
+  if (!list.length) {
+    container.innerHTML = emptyState("🏆", "No data yet");
+    return;
+  }
 
-    container.innerHTML = list.map((s, i) => `
+  const uniquePoints = [...new Set(list.map(s => Number(s.totalPoints || 0)))]
+    .sort((a, b) => b - a);
+
+  container.innerHTML = list.map((s) => {
+    const sPts = Number(s.totalPoints || 0);
+    const actualRank = uniquePoints.indexOf(sPts) + 1;
+    const rankLabel = actualRank <= 3 ? medals[actualRank - 1] : actualRank;
+
+    return `
       <div class="activity-feed-item">
-        <div style="font-size:18px">${medals[i] || "🏅"}</div>
+        <div style="font-size:18px">${rankLabel}</div>
         <div class="af-text">
           <strong>${escapeHtml(s.fullName || "")}</strong><br>
           <small style="color:rgba(232,232,234,.4)">
@@ -147,10 +155,11 @@ import { loadOverviewData } from "../firebase1/firestore-service.js";
               : ""}
           </small>
         </div>
-        <span class="pts-pill">${Number(s.totalPoints || 0)} pts</span>
+        <span class="pts-pill">${sPts} pts</span>
       </div>
-    `).join("");
-  }
+    `;
+  }).join("");
+}
 
   function populateManagerFilter(selectEl, committees) {
     if (!selectEl) return;

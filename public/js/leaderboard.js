@@ -83,7 +83,7 @@ container.innerHTML = list.map((s, i) => {
           </div>
         </div>
     `;
-}).join('');;
+}).join('');
   }
 
   async function loadCommitteesMap() {

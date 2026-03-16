@@ -159,6 +159,12 @@ export async function loadOverviewData(committeeId = null) {
 
   const totalPoints = assignments.reduce((sum, a) => sum + Number(a.points || 0), 0);
 
+  const topStudents = leaderboard.length
+    ? leaderboard.filter(s =>
+        Number(s.totalPoints || 0) >= Number(leaderboard[Math.min(2, leaderboard.length - 1)].totalPoints || 0)
+      )
+    : [];
+
   return {
     members,
     activities,
@@ -166,7 +172,7 @@ export async function loadOverviewData(committeeId = null) {
     leaderboard,
     totalPoints,
     recentAssignments: assignments.slice(0, 5),
-    topStudents: leaderboard.slice(0, 3)
+    topStudents
   };
 }
 
