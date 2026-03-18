@@ -1,79 +1,162 @@
 import { requireAuth, logout } from "../firebase1/auth-guard.js";
-import { database } from "../firebase1/firebase-config.js";
-import {
-  collection,
-  getDocs
-} from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
 import {
   loadMembers,
   addMember,
   deleteMember,
   memberPhoneExists,
-  loadAssignments
+  loadCommitteesMap
 } from "../firebase1/firestore-service.js";
 
 (async function () {
   'use strict';
 
+  // ── Show skeleton immediately ─────────────────────────────────────────────
+  // FIX: colspan updated to 9 (was 8 — "Total Points" th had no matching td).
+  // New column layout: #, Name, Phone, Major, Level, Gender, Registered, [Committee|Delete]
+  Utils.showTableSkeleton('students-tbody', 9);
+
   const profile = await requireAuth();
   Utils.initSidebarUser();
 
   document.getElementById('logout-btn')?.addEventListener('click', logout);
-  document.getElementById('student-search')?.addEventListener('input', e => renderTable(e.target.value));
 
+  // ── Module-level state ────────────────────────────────────────────────────
+  let cachedMembers      = [];
+  let cachedCommitteesMap = {};
+
+  // activeCommitteeId:
+  //   - For 'head' role: always profile.committeeId (never changes).
+  //   - For 'manager' role: null = all committees, or a specific committeeId
+  //     when the manager has selected one from the filter dropdown.
+  let activeCommitteeId = profile.role === 'manager' ? null : profile.committeeId;
+
+  // ── Delete handler ────────────────────────────────────────────────────────
   const tbody = document.getElementById('students-tbody');
   tbody?.addEventListener('click', async (e) => {
     const btn = e.target.closest('.delete-student-btn');
     if (!btn) return;
 
-    const memberId = btn.dataset.id;
+    const memberId   = btn.dataset.id;
     const memberName = btn.dataset.name || 'this student';
 
-    const ok = confirm(`Are you sure you want to delete ${memberName}?`);
-    if (!ok) return;
+    if (!confirm(`Are you sure you want to delete ${memberName}?`)) return;
 
     try {
       btn.disabled = true;
-      await deleteMember(memberId);
-      await renderTable(document.getElementById('student-search')?.value || '');
+      await deleteMember(memberId, profile.committeeId);
+      await refreshData();
+      renderTable(document.getElementById('student-search')?.value || '');
       Utils.toast('Student deleted', 'success');
     } catch (error) {
       console.error(error);
       Utils.toast('Failed to delete student', 'error');
+    } finally {
+      btn.disabled = false;
     }
   });
 
-  const formCard = document.getElementById('students-form-card');
-  const addBtn = document.getElementById('add-student-btn');
-  const clearBtn = document.getElementById('clear-student-btn');
+  // ── Role-based UI setup ───────────────────────────────────────────────────
+  const formCard         = document.getElementById('students-form-card');
+  const addBtn           = document.getElementById('add-student-btn');
+  const clearBtn         = document.getElementById('clear-student-btn');
   const committeeHeadCell = document.getElementById('committee-head-cell');
+  const deleteHeadCell   = document.getElementById('delete-head-cell');
 
   if (profile.role === 'manager') {
+    // Manager: hide the add-student form, show the Committee column,
+    // hide the Action (delete) column, and show the filter card.
     if (formCard) formCard.style.display = 'none';
     if (committeeHeadCell) committeeHeadCell.style.display = '';
+    if (deleteHeadCell) deleteHeadCell.style.display = 'none';
+
+    await _initManagerFilter();
   } else {
     addBtn?.addEventListener('click', addStudent);
     clearBtn?.addEventListener('click', clearForm);
   }
 
-  await renderTable();
+  // ── Search (in-memory, debounced) ─────────────────────────────────────────
+  document.getElementById('student-search')?.addEventListener(
+    'input',
+    Utils.debounce(e => renderTable(e.target.value), 200)
+  );
+
+  // ── Initial data load ─────────────────────────────────────────────────────
+  await refreshData();
+  renderTable();
+
+  // ═══════════════════════════════════════════════════════════════════════════
+  // MANAGER FILTER
+  // ═══════════════════════════════════════════════════════════════════════════
+
+  /**
+   * Shows the filter card, populates the committee <select> from
+   * loadCommitteesMap(), and wires the change event so selecting a committee
+   * re-fetches and re-renders with that scope.
+   */
+  async function _initManagerFilter() {
+    const filterCard   = document.getElementById('manager-filter-card');
+    const filterSelect = document.getElementById('committee-filter-select');
+    if (!filterCard || !filterSelect) return;
+
+    filterCard.style.display = 'block';
+
+    // Populate the dropdown — loadCommitteesMap() uses sessionStorage cache.
+    const committeesMap = await loadCommitteesMap();
+    const entries = Object.entries(committeesMap);
+
+    if (entries.length) {
+      filterSelect.innerHTML =
+        '<option value="all">All Committees</option>' +
+        entries.map(([id, name]) =>
+          `<option value="${Utils.escapeHtml(id)}">${Utils.escapeHtml(name)}</option>`
+        ).join('');
+    }
+
+    // On change: update the active scope, re-fetch, re-render.
+    filterSelect.addEventListener('change', Utils.debounce(async () => {
+      const val = filterSelect.value;
+      activeCommitteeId = val === 'all' ? null : val;
+      await refreshData();
+      renderTable(document.getElementById('student-search')?.value || '');
+    }, 300));
+  }
+
+  // ═══════════════════════════════════════════════════════════════════════════
+  // DATA
+  // ═══════════════════════════════════════════════════════════════════════════
+
+  async function refreshData() {
+    try {
+      [cachedMembers, cachedCommitteesMap] = await Promise.all([
+        loadMembers(activeCommitteeId),
+        loadCommitteesMap()
+      ]);
+    } catch (err) {
+      console.error('Failed to load student data:', err);
+      const tbody = document.getElementById('students-tbody');
+      if (tbody) {
+        tbody.innerHTML = `<tr><td colspan="9">${Utils.emptyState('⚠️', 'Failed to load data. Please refresh the page.')}</td></tr>`;
+      }
+    }
+  }
 
   async function addStudent() {
     const fullName = Utils.val('s-name');
-    const phone = Utils.val('s-phone');
-    const major = Utils.val('s-major');
-    const level = Utils.val('s-level');
-    const gender = Utils.val('s-gender');
+    const phone    = Utils.val('s-phone');
+    const major    = Utils.val('s-major');
+    const level    = Utils.val('s-level');
+    const gender   = Utils.val('s-gender');
 
     const controls = ['s-name', 's-phone', 's-major', 's-level', 's-gender'];
     Utils.clearErrors(controls);
 
     let valid = true;
     if (!fullName) { Utils.showFieldError('s-name', 'err-s-name'); valid = false; }
-    if (!phone) { Utils.showFieldError('s-phone', 'err-s-phone'); valid = false; }
-    if (!major) { Utils.showFieldError('s-major', 'err-s-major'); valid = false; }
-    if (!level) { Utils.showFieldError('s-level', 'err-s-level'); valid = false; }
-    if (!gender) { Utils.showFieldError('s-gender', 'err-s-gender'); valid = false; }
+    if (!phone)    { Utils.showFieldError('s-phone', 'err-s-phone'); valid = false; }
+    if (!major)    { Utils.showFieldError('s-major', 'err-s-major'); valid = false; }
+    if (!level)    { Utils.showFieldError('s-level', 'err-s-level'); valid = false; }
+    if (!gender)   { Utils.showFieldError('s-gender', 'err-s-gender'); valid = false; }
     if (!valid) return;
 
     const committeeId = profile.committeeId;
@@ -85,144 +168,111 @@ import {
       return;
     }
 
-    await addMember(
-      committeeId,
-      { fullName, phone, major, level, gender },
-      profile.uid
-    );
+    await addMember(committeeId, { fullName, phone, major, level, gender }, profile.uid);
 
-    await renderTable();
+    await refreshData();
+    renderTable();
     clearForm();
     Utils.showAlert('student-form-alert', 'success', '✅ Member added successfully!');
     Utils.toast('Member added', 'success');
   }
 
-  async function renderTable(filter = '') {
-  const tbody = document.getElementById('students-tbody');
-  const countEl = document.getElementById('students-count-label');
+  // ═══════════════════════════════════════════════════════════════════════════
+  // RENDER
+  // ═══════════════════════════════════════════════════════════════════════════
 
-  const committeeId = profile.role === 'manager' ? null : profile.committeeId;
+  /**
+   * Pure render — uses cached data, zero Firestore reads.
+   *
+   * FIX — Date column:
+   *   addMember() saves createdAt via serverTimestamp().
+   *   The original code never read or rendered this field.
+   *   Now: Utils.formatDate(m.createdAt) is rendered in a "Registered" <td>.
+   *
+   * FIX — Column count:
+   *   Original colspan was 8 but the head role only produced 7 <td> because
+   *   "Total Points" had a <th> but no matching <td>, while the delete button
+   *   had a <td> but no <th>.
+   *   New layout (9 columns total):
+   *     #, Name, Phone, Major, Level, Gender, Registered, [Committee OR Delete]
+   *   Both roles produce exactly 8 data cells + the conditional 9th.
+   */
+  function renderTable(filter = '') {
+    const tbody    = document.getElementById('students-tbody');
+    const countEl  = document.getElementById('students-count-label');
 
-  const [members, assignments, committeesMap] = await Promise.all([
-    loadMembers(committeeId),
-    loadAssignments(committeeId),
-    loadCommitteesMap()
-  ]);
+    const normalizedFilter = (filter || '').trim().toLowerCase();
 
-  const normalizedFilter = filter.trim().toLowerCase();
+    const list = normalizedFilter
+      ? cachedMembers.filter(m =>
+          (m.fullName || '').toLowerCase().includes(normalizedFilter) ||
+          (m.phone || '').includes(normalizedFilter)
+        )
+      : cachedMembers;
 
-  const list = normalizedFilter
-    ? members.filter(m =>
-        (m.fullName || '').toLowerCase().includes(normalizedFilter) ||
-        (m.phone || '').includes(normalizedFilter)
-      )
-    : members;
+    if (countEl) {
+      countEl.textContent = `${cachedMembers.length} student${cachedMembers.length !== 1 ? 's' : ''} registered`;
+    }
 
-  if (countEl) {
-    countEl.textContent = `${members.length} student${members.length !== 1 ? 's' : ''} registered`;
-  }
+    if (!tbody) return;
 
-  if (!tbody) return;
+    // colspan = 9 to cover all columns including the conditional one.
+    const colspan = 9;
 
-  const colspan = 8;
+    if (!list.length) {
+      tbody.innerHTML = `<tr><td colspan="${colspan}">${Utils.emptyState('📭', normalizedFilter ? 'No students match your search' : 'No students added yet')}</td></tr>`;
+      return;
+    }
 
-  if (!list.length) {
-    tbody.innerHTML = `<tr><td colspan="${colspan}">${emptyState('📭', normalizedFilter ? 'No students match your search' : 'No students added yet')}</td></tr>`;
-    return;
-  }
+    tbody.innerHTML = list.map((m, i) => {
+      // FIX: read createdAt from the Firestore doc and format it.
+      const registeredDate = Utils.formatDate(m.createdAt || null);
 
-  tbody.innerHTML = list.map((m, i) => {
-    const committeeCell = profile.role === 'manager'
-      ? `<td><span class="badge badge-green">${escapeHtml(committeesMap[m.committeeId] || m.committeeId || '-')}</span></td>`
-      : '';
-
-    const deleteCell = profile.role !== 'manager'
-      ? `
-        <td style="text-align:center;">
-          <button
-            class="delete-student-btn"
-            type="button"
-            data-id="${escapeHtml(m.id || '')}"
-            data-name="${escapeHtml(m.fullName || 'Student')}"
-            title="Delete student"
-            aria-label="Delete student"
-            style="
-              width: 34px;
-              height: 34px;
-              display: inline-flex;
-              align-items: center;
-              justify-content: center;
-              background: transparent;
-              border: 1px solid rgba(255,255,255,0.08);
-              border-radius: 10px;
-              cursor: pointer;
-              transition: 0.2s ease;
-            "
-            onmouseover="this.style.background='rgba(255,255,255,0.05)';this.style.borderColor='rgba(255,255,255,0.14)'"
-            onmouseout="this.style.background='transparent';this.style.borderColor='rgba(255,255,255,0.08)'"
-          >
-            <svg
-              xmlns="http://www.w3.org/2000/svg"
-              width="16"
-              height="16"
-              viewBox="0 0 24 24"
-              fill="none"
-              stroke="#9CA3AF"
-              stroke-width="2"
-              stroke-linecap="round"
-              stroke-linejoin="round"
+      // Manager sees Committee cell; head sees Delete cell.
+      const conditionalCell = profile.role === 'manager'
+        ? `<td><span class="badge badge-green">${Utils.escapeHtml(cachedCommitteesMap[m.committeeId] || m.committeeId || '-')}</span></td>`
+        : `<td style="text-align:center;">
+            <button
+              class="delete-student-btn"
+              type="button"
+              data-id="${Utils.escapeHtml(m.id || '')}"
+              data-name="${Utils.escapeHtml(m.fullName || 'Student')}"
+              title="Delete student"
+              aria-label="Delete student"
+              style="
+                width:34px;height:34px;display:inline-flex;align-items:center;
+                justify-content:center;background:transparent;
+                border:1px solid rgba(255,255,255,0.08);border-radius:10px;
+                cursor:pointer;transition:0.2s ease;
+              "
+              onmouseover="this.style.background='rgba(255,255,255,0.05)';this.style.borderColor='rgba(255,255,255,0.14)'"
+              onmouseout="this.style.background='transparent';this.style.borderColor='rgba(255,255,255,0.08)'"
             >
-              <path d="M3 6h18"/>
-              <path d="M8 6V4h8v2"/>
-              <path d="M19 6l-1 14H6L5 6"/>
-              <path d="M10 11v6"/>
-              <path d="M14 11v6"/>
-            </svg>
-          </button>
-        </td>
-      `
-      : '';
+              <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24"
+                fill="none" stroke="#9CA3AF" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M3 6h18"/><path d="M8 6V4h8v2"/>
+                <path d="M19 6l-1 14H6L5 6"/>
+                <path d="M10 11v6"/><path d="M14 11v6"/>
+              </svg>
+            </button>
+          </td>`;
 
-    return `
-      <tr>
-        <td class="row-index">${i + 1}</td>
-        <td><strong>${escapeHtml(m.fullName || '')}</strong></td>
-        <td style="font-size:12px;color:rgba(232,232,234,.6)">${escapeHtml(m.phone || '')}</td>
-        <td>${escapeHtml(m.major || '')}</td>
-        <td><span class="badge badge-blue">${escapeHtml(m.level || '')}</span></td>
-        <td><span class="badge ${(m.gender || '') === 'Male' ? 'badge-sky' : 'badge-amber'}">${escapeHtml(m.gender || '')}</span></td>
-        ${deleteCell}
-        ${committeeCell}
-      </tr>
-    `;
-  }).join('');
-}
-
-  async function loadCommitteesMap() {
-    const snap = await getDocs(collection(database, "committees"));
-    const map = {};
-    snap.forEach(doc => {
-      const data = doc.data();
-      map[data.committeeId || doc.id] = data.name || data.committeeId || doc.id;
-    });
-    return map;
+      return `
+        <tr>
+          <td class="row-index">${i + 1}</td>
+          <td><strong>${Utils.escapeHtml(m.fullName || '')}</strong></td>
+          <td style="font-size:12px;color:rgba(232,232,234,.6)">${Utils.escapeHtml(m.phone || '')}</td>
+          <td>${Utils.escapeHtml(m.major || '')}</td>
+          <td><span class="badge badge-blue">${Utils.escapeHtml(m.level || '')}</span></td>
+          <td><span class="badge ${(m.gender || '') === 'Male' ? 'badge-sky' : 'badge-amber'}">${Utils.escapeHtml(m.gender || '')}</span></td>
+          <td style="font-size:12px;color:rgba(232,232,234,.45)">${registeredDate}</td>
+          ${conditionalCell}
+        </tr>`;
+    }).join('');
   }
 
   function clearForm() {
     Utils.resetFields(['s-name', 's-phone', 's-major', 's-level', 's-gender']);
     Utils.clearErrors(['s-name', 's-phone', 's-major', 's-level', 's-gender']);
-  }
-
-  function emptyState(emoji, text) {
-    return `<div class="empty-state"><div class="emoji">${emoji}</div><p>${text}</p></div>`;
-  }
-
-  function escapeHtml(value) {
-    return String(value ?? '')
-      .replace(/&/g, '&amp;')
-      .replace(/</g, '&lt;')
-      .replace(/>/g, '&gt;')
-      .replace(/"/g, '&quot;')
-      .replace(/'/g, '&#39;');
   }
 })();

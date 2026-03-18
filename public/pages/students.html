@@ -54,6 +54,26 @@
 
       <div class="page-content">
 
+        <!--
+          MANAGER FILTER CARD
+          Hidden by default. students.js shows this block only when
+          profile.role === 'manager', then populates the <select> with
+          committee options fetched from loadCommitteesMap().
+        -->
+        <div class="card" id="manager-filter-card" style="display:none">
+          <div class="card-header" style="padding-bottom:0">
+            <div>
+              <div class="card-title">Filter by Committee</div>
+              <div class="card-subtitle">classification</div>
+            </div>
+          </div>
+          <div style="padding:16px 24px 20px">
+            <select class="form-control" id="committee-filter-select" style="max-width:320px">
+              <option value="all">All Committees</option>
+            </select>
+          </div>
+        </div>
+
         <div class="card" id="students-form-card">
           <div class="card-header">
             <div>
@@ -73,7 +93,7 @@
 
             <div class="form-group">
               <label for="s-phone">Phone *</label>
-              <input class="form-control" id="s-phone" type="text" placeholder="e.g. 0501234567" />
+              <input class="form-control" id="s-phone" type="number" placeholder="e.g. 0501234567" maxlength="10" minlength="9" />
               <div class="field-error hidden" id="err-s-phone">Phone is required</div>
             </div>
 
@@ -129,13 +149,21 @@
                   <th>Major</th>
                   <th>Level</th>
                   <th>Gender</th>
+                  <!--
+                    FIX: was "Total Points" — no corresponding <td> was ever rendered.
+                    Replaced with "Registered" (the createdAt date that IS saved to
+                    Firestore by addMember but was never displayed).
+                    committee-head-cell is hidden by default; shown for manager role.
+                    delete-head-cell is shown by default; hidden for manager role.
+                  -->
+                  <th>Registered</th>
                   <th id="committee-head-cell" style="display:none">Committee</th>
-                  
+                  <th id="delete-head-cell">Action</th>
                 </tr>
               </thead>
               <tbody id="students-tbody">
                 <tr>
-                  <td colspan="8">
+                  <td colspan="9">
                     <div class="empty-state">
                       <div class="emoji">📭</div>
                       <p>No students added yet</p>

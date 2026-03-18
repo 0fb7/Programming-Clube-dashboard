@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Assignments — CodeClub Admin</title>
+  <title>Assignments</title>
   <link rel="stylesheet" href="../css/base.css" />
   <link rel="stylesheet" href="../css/dashboard.css" />
 </head>
@@ -53,6 +53,25 @@
       </div>
 
       <div class="page-content">
+
+        <!--
+          MANAGER FILTER CARD
+          Hidden by default. assignments.js shows this block only when
+          profile.role === 'manager', then populates the <select>.
+        -->
+        <div class="card" id="manager-filter-card" style="display:none">
+          <div class="card-header" style="padding-bottom:0">
+            <div>
+              <div class="card-title">Filter by Committee</div>
+              <div class="card-subtitle">classification</div>
+            </div>
+          </div>
+          <div style="padding:16px 24px 20px">
+            <select class="form-control" id="committee-filter-select" style="max-width:320px">
+              <option value="all">All Committees</option>
+            </select>
+          </div>
+        </div>
 
         <div class="card" id="assignments-form-card">
           <div class="card-header">
@@ -121,15 +140,24 @@
                   <th>#</th>
                   <th>Student</th>
                   <th>Activity</th>
-                  <th id="committee-head-cell" style="display:none">Committee</th>
+                  <!--
+                    committee-head-cell hidden by default; shown for manager.
+                    FIX: Added "Action" <th> — was completely missing from the
+                    original HTML. The JS was already rendering a delete <td>
+                    for head role, causing every row's columns to be offset by
+                    one (Date appeared under Description header, etc.).
+                    delete-head-cell is shown by default; hidden for manager.
+                  -->
+                  
                   <th>Points</th>
                   <th>Description</th>
                   <th>Date</th>
+                  <th id="committee-head-cell" style="display:none">Committee</th>
                 </tr>
               </thead>
               <tbody id="assignments-tbody">
                 <tr>
-                  <td colspan="7">
+                  <td colspan="8">
                     <div class="empty-state">
                       <div class="emoji">📋</div>
                       <p>No assignments recorded yet</p>

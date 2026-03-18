@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Activities </title>
+  <title>Activities</title>
   <link rel="stylesheet" href="../css/base.css" />
   <link rel="stylesheet" href="../css/dashboard.css" />
 </head>
@@ -15,7 +15,6 @@
         <div class="sidebar-logo-text">
           Programming Club
           <small>Administration website</small>
-          
         </div>
       </a>
 
@@ -54,6 +53,26 @@
       </div>
 
       <div class="page-content">
+
+        <!--
+          MANAGER FILTER CARD
+          Hidden by default. activities.js shows this block only when
+          profile.role === 'manager', then populates the <select>.
+        -->
+        <div class="card" id="manager-filter-card" style="display:none">
+          <div class="card-header" style="padding-bottom:0">
+            <div>
+              <div class="card-title">Filter by Committee</div>
+              <div class="card-subtitle">classification</div>
+            </div>
+          </div>
+          <div style="padding:16px 24px 20px">
+            <select class="form-control" id="committee-filter-select" style="max-width:320px">
+              <option value="all">All Committees</option>
+            </select>
+          </div>
+        </div>
+
         <div class="card" id="activities-form-card">
           <div class="card-header">
             <div>
@@ -105,13 +124,22 @@
                   <th>#</th>
                   <th>Activity Name</th>
                   <th>Activity ID</th>
-                  <th id="committee-head-cell" style="display:none">Committee</th>
+                  <!--
+                    FIX: committee-head-cell hidden by default, shown for manager.
+                    Added "Created" date column — createdAt IS saved by addActivity
+                    via serverTimestamp() but was never displayed.
+                    Added "Action" column for the delete button — was missing entirely,
+                    causing column misalignment for head role.
+                  -->
                   <th>Points</th>
+                  <th>Created</th>
+                  <th id="committee-head-cell" style="display:none">Committee</th>
+                  
                 </tr>
               </thead>
               <tbody id="activities-tbody">
                 <tr>
-                  <td colspan="5">
+                  <td colspan="7">
                     <div class="empty-state">
                       <div class="emoji">⚡</div>
                       <p>No activities created yet</p>
