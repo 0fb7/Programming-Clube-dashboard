@@ -72,6 +72,8 @@
           </div>
         </div>
 
+       
+
         <div class="stats-grid">
           <div class="stat-card">
             <div class="stat-icon">👨‍💻</div>
@@ -135,6 +137,39 @@
             </div>
           </div>
         </div>
+
+         <div class="card" id="change-password-card">
+  <div class="card-header">
+    <div>
+      <div class="card-title">Change Password</div>
+      <div class="card-subtitle">Update your account password securely</div>
+    </div>
+  </div>
+
+  <div id="change-pass-alert" class="alert hidden"></div>
+
+  <div class="form-grid">
+    <div class="form-group">
+      <label for="current-pass">Current Password *</label>
+      <input class="form-control" id="current-pass" type="password" autocomplete="current-password" />
+    </div>
+
+    <div class="form-group">
+      <label for="new-pass">New Password *</label>
+      <input class="form-control" id="new-pass" type="password" autocomplete="new-password" />
+    </div>
+
+    <div class="form-group full">
+      <label for="confirm-pass">Confirm New Password *</label>
+      <input class="form-control" id="confirm-pass" type="password" autocomplete="new-password" />
+    </div>
+  </div>
+
+  <div class="form-actions">
+    <button class="btn btn-secondary" type="button" id="clear-pass-btn">Clear</button>
+    <button class="btn btn-primary" type="button" id="change-pass-btn">Update Password</button>
+  </div>
+</div>
 
       </div>
     </div>

@@ -126,3 +126,31 @@
     padding: 32px 24px;
   }
 }
+.login-actions-row {
+  display: flex;
+  justify-content: flex-end;
+  margin-top: -4px;
+  margin-bottom: 16px;
+}
+
+.text-link-btn {
+  background: transparent;
+  border: none;
+  color: var(--blue);
+  font-family: 'Kufam', sans-serif;
+  font-size: 12px;
+  font-weight: 700;
+  cursor: pointer;
+  padding: 0;
+  transition: opacity 0.2s ease, transform 0.2s ease;
+}
+
+.text-link-btn:hover {
+  opacity: 0.85;
+  transform: translateY(-1px);
+}
+
+.text-link-btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}

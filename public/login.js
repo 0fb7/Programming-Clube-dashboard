@@ -1,11 +1,12 @@
 import { auth, database } from "./firebase1/firebase-config.js";
-import { signInWithEmailAndPassword } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
+import { signInWithEmailAndPassword,sendPasswordResetEmail } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
 import { doc, getDoc } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
 
 const loginBtn  = document.getElementById("login-btn");
 const emailInput = document.getElementById("login-email");
 const passInput  = document.getElementById("login-pass");
 const errorEl    = document.getElementById("login-error");
+const forgotPasswordBtn = document.getElementById("forgot-password-btn");
 
 // FIX 5: pressing Enter in either input field triggers login —
 // standard browser form UX that was missing entirely.
@@ -14,6 +15,7 @@ passInput?.addEventListener("keydown",  e => { if (e.key === "Enter") handleLogi
 
 // FIX 6: guard before addEventListener so a missing element doesn't throw
 loginBtn?.addEventListener("click", handleLogin);
+forgotPasswordBtn?.addEventListener("click", handleForgotPassword);
 
 async function handleLogin() {
   const email = emailInput?.value.trim() ?? "";
@@ -81,7 +83,44 @@ async function handleLogin() {
     setLoading(false);
   }
 }
+async function handleForgotPassword() {
+  const email = emailInput?.value.trim() ?? "";
 
+  hideError();
+
+  if (!email) {
+    showError("Please enter your email first, then press Forgot Password.");
+    emailInput?.focus();
+    return;
+  }
+
+  try {
+    forgotPasswordBtn.disabled = true;
+
+    auth.useDeviceLanguage();
+    await sendPasswordResetEmail(auth, email);
+
+    if (window.Utils?.toast) {
+      Utils.toast("Password reset email sent successfully.", "success");
+    } else {
+      alert("Password reset email sent successfully.");
+    }
+  } catch (err) {
+    console.error(err);
+
+    if (err.code === "auth/user-not-found" || err.code === "auth/invalid-email") {
+      showError("Please enter a valid registered email.");
+    } else if (err.code === "auth/too-many-requests") {
+      showError("Too many attempts. Please wait a moment and try again.");
+    } else if (err.code === "auth/network-request-failed") {
+      showError("Network error. Please check your connection.");
+    } else {
+      showError("Failed to send reset email. Please try again.");
+    }
+  } finally {
+    forgotPasswordBtn.disabled = false;
+  }
+}
 function setLoading(isLoading) {
   if (!loginBtn) return;
   loginBtn.disabled = isLoading;

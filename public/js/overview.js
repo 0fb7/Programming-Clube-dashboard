@@ -1,5 +1,12 @@
 import { requireAuth, logout } from "../firebase1/auth-guard.js";
 import { loadOverviewData, loadCommitteesMap } from "../firebase1/firestore-service.js";
+import {
+  EmailAuthProvider,
+  reauthenticateWithCredential,
+  updatePassword
+} from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
+
+import { auth } from "../firebase1/firebase-config.js";
 
 (async function () {
   "use strict";
@@ -14,6 +21,15 @@ import { loadOverviewData, loadCommitteesMap } from "../firebase1/firestore-serv
   Utils.initSidebarUser();
 
   document.getElementById("logout-btn")?.addEventListener("click", logout);
+
+  const currentPassInput = document.getElementById("current-pass");
+const newPassInput = document.getElementById("new-pass");
+const confirmPassInput = document.getElementById("confirm-pass");
+const changePassBtn = document.getElementById("change-pass-btn");
+const clearPassBtn = document.getElementById("clear-pass-btn");
+
+changePassBtn?.addEventListener("click", handleChangePassword);
+clearPassBtn?.addEventListener("click", clearPasswordForm);
 
   const managerFilterCard = document.getElementById("manager-filter-card");
   const filterSelect = document.getElementById("overview-committee-filter");
@@ -211,4 +227,73 @@ import { loadOverviewData, loadCommitteesMap } from "../firebase1/firestore-serv
     const el = document.getElementById(id);
     if (el) el.textContent = value;
   }
+
+  async function handleChangePassword() {
+  const currentPassword = currentPassInput?.value ?? "";
+  const newPassword = newPassInput?.value ?? "";
+  const confirmPassword = confirmPassInput?.value ?? "";
+
+  if (!currentPassword || !newPassword || !confirmPassword) {
+    Utils.showAlert("change-pass-alert", "error", "⚠️ Please fill in all password fields.");
+    return;
+  }
+
+  if (newPassword.length < 6) {
+    Utils.showAlert("change-pass-alert", "error", "⚠️ New password must be at least 6 characters.");
+    return;
+  }
+
+  if (newPassword !== confirmPassword) {
+    Utils.showAlert("change-pass-alert", "error", "⚠️ New password and confirmation do not match.");
+    return;
+  }
+
+  try {
+    changePassBtn.disabled = true;
+    changePassBtn.textContent = "Updating...";
+
+    const user = auth.currentUser;
+
+    if (!user || !user.email) {
+      Utils.showAlert("change-pass-alert", "error", "⚠️ No authenticated user found.");
+      return;
+    }
+
+    const credential = EmailAuthProvider.credential(user.email, currentPassword);
+
+    await reauthenticateWithCredential(user, credential);
+    await updatePassword(user, newPassword);
+
+    clearPasswordForm();
+    Utils.showAlert("change-pass-alert", "success", "✅ Password updated successfully.");
+    Utils.toast("Password changed successfully", "success");
+  } catch (err) {
+    console.error(err);
+
+    if (
+      err.code === "auth/wrong-password" ||
+      err.code === "auth/invalid-credential" ||
+      err.code === "auth/invalid-login-credentials"
+    ) {
+      Utils.showAlert("change-pass-alert", "error", "⚠️ Current password is incorrect.");
+    } else if (err.code === "auth/weak-password") {
+      Utils.showAlert("change-pass-alert", "error", "⚠️ New password is too weak.");
+    } else if (err.code === "auth/too-many-requests") {
+      Utils.showAlert("change-pass-alert", "error", "⚠️ Too many attempts. Please wait and try again.");
+    } else if (err.code === "auth/network-request-failed") {
+      Utils.showAlert("change-pass-alert", "error", "⚠️ Network error. Please check your connection.");
+    } else {
+      Utils.showAlert("change-pass-alert", "error", "⚠️ Failed to change password. Please try again.");
+    }
+  } finally {
+    changePassBtn.disabled = false;
+    changePassBtn.textContent = "Update Password";
+  }
+}
+
+function clearPasswordForm() {
+  currentPassInput && (currentPassInput.value = "");
+  newPassInput && (newPassInput.value = "");
+  confirmPassInput && (confirmPassInput.value = "");
+}
 })();
