@@ -181,22 +181,6 @@ import {
   // RENDER
   // ═══════════════════════════════════════════════════════════════════════════
 
-  /**
-   * Pure render — uses cached data, zero Firestore reads.
-   *
-   * FIX — Date column:
-   *   addMember() saves createdAt via serverTimestamp().
-   *   The original code never read or rendered this field.
-   *   Now: Utils.formatDate(m.createdAt) is rendered in a "Registered" <td>.
-   *
-   * FIX — Column count:
-   *   Original colspan was 8 but the head role only produced 7 <td> because
-   *   "Total Points" had a <th> but no matching <td>, while the delete button
-   *   had a <td> but no <th>.
-   *   New layout (9 columns total):
-   *     #, Name, Phone, Major, Level, Gender, Registered, [Committee OR Delete]
-   *   Both roles produce exactly 8 data cells + the conditional 9th.
-   */
   function renderTable(filter = '') {
     const tbody    = document.getElementById('students-tbody');
     const countEl  = document.getElementById('students-count-label');
@@ -216,7 +200,6 @@ import {
 
     if (!tbody) return;
 
-    // colspan = 9 to cover all columns including the conditional one.
     const colspan = 9;
 
     if (!list.length) {

@@ -149,16 +149,8 @@
                   <th>Major</th>
                   <th>Level</th>
                   <th>Gender</th>
-                  <!--
-                    FIX: was "Total Points" — no corresponding <td> was ever rendered.
-                    Replaced with "Registered" (the createdAt date that IS saved to
-                    Firestore by addMember but was never displayed).
-                    committee-head-cell is hidden by default; shown for manager role.
-                    delete-head-cell is shown by default; hidden for manager role.
-                  -->
                   <th>Registered</th>
                   <th id="committee-head-cell" style="display:none">Committee</th>
-                  <th id="delete-head-cell">Action</th>
                 </tr>
               </thead>
               <tbody id="students-tbody">
