@@ -86,26 +86,36 @@
   /* ----------------------------------------------------------
      SIDEBAR USER INFO
   ---------------------------------------------------------- */
-  function initSidebarUser() {
-    const raw = sessionStorage.getItem('cc_user');
-    let user = null;
-    try {
-      user = raw ? JSON.parse(raw) : null;
-    } catch {
-      user = null;
-    }
+ function initSidebarUser() {
+  const raw = sessionStorage.getItem('cc_user');
+  let user = null;
 
-    const displayName =
-      user?.displayName ||
-      user?.name ||
-      user?.email ||
-      'Admin';
-
-    const avatarEl = document.getElementById('sidebar-avatar');
-    const nameEl = document.getElementById('sidebar-username');
-    if (avatarEl) avatarEl.textContent = displayName.charAt(0).toUpperCase();
-    if (nameEl) nameEl.textContent = displayName;
+  try {
+    user = raw ? JSON.parse(raw) : null;
+  } catch {
+    user = null;
   }
+
+  const displayName =
+    user?.displayName ||
+    user?.name ||
+    user?.email ||
+    'Admin';
+
+  const roleLabel =
+    user?.title ||
+    (user?.role === 'manager' ? 'President' :
+     user?.role === 'committee' ? 'Committee Head' :
+     'Administrator');
+
+  const avatarEl = document.getElementById('sidebar-avatar');
+  const nameEl = document.getElementById('sidebar-username');
+  const roleEl = document.getElementById('sidebar-role-label');
+
+  if (avatarEl) avatarEl.textContent = displayName.charAt(0).toUpperCase();
+  if (nameEl) nameEl.textContent = displayName;
+  if (roleEl) roleEl.textContent = roleLabel;
+}
 
   /* ----------------------------------------------------------
      HIGHLIGHT (search term in text)
