@@ -16,7 +16,6 @@
         <div class="sidebar-logo-text">
           Programming Club
           <small>Administration website</small>
-
         </div>
       </a>
 
@@ -72,26 +71,52 @@
           </div>
         </div>
 
-       
-
         <div class="stats-grid">
-          <div class="stat-card">
-            <div class="stat-icon">👨‍💻</div>
+          <!-- Students -->
+          <div class="stat-card stat-card-students">
+            <div class="stat-icon" aria-hidden="true">
+              <svg viewBox="0 0 24 24">
+                <path d="M12 12a3.5 3.5 0 1 0-3.5-3.5A3.5 3.5 0 0 0 12 12Z"></path>
+                <path d="M6.5 19a5.5 5.5 0 0 1 11 0"></path>
+                <path d="M18.5 18.5a4.4 4.4 0 0 0-2.15-3.78"></path>
+              </svg>
+            </div>
             <div class="stat-value" id="stat-students">0</div>
             <div class="stat-label">Total Students</div>
           </div>
-          <div class="stat-card sky">
-            <div class="stat-icon">⚡</div>
+
+          <!-- Activities -->
+          <div class="stat-card sky stat-card-activities">
+            <div class="stat-icon" aria-hidden="true">
+              <svg viewBox="0 0 24 24">
+                <path d="M13 2 4 14h6l-1 8 9-12h-6l1-8Z"></path>
+              </svg>
+            </div>
             <div class="stat-value" id="stat-activities">0</div>
             <div class="stat-label">Activities</div>
           </div>
-          <div class="stat-card green">
-            <div class="stat-icon">📋</div>
+
+          <!-- Assignments -->
+          <div class="stat-card green stat-card-assignments">
+            <div class="stat-icon" aria-hidden="true">
+              <svg viewBox="0 0 24 24">
+                <path d="M9 3.75A1.75 1.75 0 0 1 10.75 2h2.5A1.75 1.75 0 0 1 15 3.75V5h2.25A2.75 2.75 0 0 1 20 7.75v10.5A2.75 2.75 0 0 1 17.25 21H6.75A2.75 2.75 0 0 1 4 18.25V7.75A2.75 2.75 0 0 1 6.75 5H9V3.75Z"></path>
+                <path d="M9 10h6"></path>
+                <path d="M9 13h6"></path>
+                <path d="M9 16h3"></path>
+              </svg>
+            </div>
             <div class="stat-value" id="stat-assignments">0</div>
             <div class="stat-label">Assignments</div>
           </div>
-          <div class="stat-card amber">
-            <div class="stat-icon">🏆</div>
+
+          <!-- Points -->
+          <div class="stat-card amber stat-card-points">
+            <div class="stat-icon" aria-hidden="true">
+              <svg viewBox="0 0 24 24">
+                <path d="M12 3 14.4 7.86 20 8.67l-4 3.9.94 5.51L12 15.6l-4.94 2.48L8 12.57l-4-3.9 5.6-.81Z"></path>
+              </svg>
+            </div>
             <div class="stat-value" id="stat-pts">0</div>
             <div class="stat-label">Points Awarded</div>
           </div>
@@ -106,7 +131,7 @@
           </div>
           <div class="stats-grid" id="committees-summary-grid">
             <div class="empty-state">
-              <div class="emoji">🏢</div>
+              <div class="emoji"></div>
               <p>No committees found</p>
             </div>
           </div>
@@ -138,38 +163,38 @@
           </div>
         </div>
 
-         <div class="card" id="change-password-card">
-  <div class="card-header">
-    <div>
-      <div class="card-title">Change Password</div>
-      <div class="card-subtitle">Update your account password securely</div>
-    </div>
-  </div>
+        <div class="card" id="change-password-card">
+          <div class="card-header">
+            <div>
+              <div class="card-title">Change Password</div>
+              <div class="card-subtitle">Update your account password securely</div>
+            </div>
+          </div>
 
-  <div id="change-pass-alert" class="alert hidden"></div>
+          <div id="change-pass-alert" class="alert hidden"></div>
 
-  <div class="form-grid">
-    <div class="form-group">
-      <label for="current-pass">Current Password *</label>
-      <input class="form-control" id="current-pass" type="password" autocomplete="current-password" />
-    </div>
+          <div class="form-grid">
+            <div class="form-group">
+              <label for="current-pass">Current Password *</label>
+              <input class="form-control" id="current-pass" type="password" autocomplete="current-password" />
+            </div>
 
-    <div class="form-group">
-      <label for="new-pass">New Password *</label>
-      <input class="form-control" id="new-pass" type="password" autocomplete="new-password" />
-    </div>
+            <div class="form-group">
+              <label for="new-pass">New Password *</label>
+              <input class="form-control" id="new-pass" type="password" autocomplete="new-password" />
+            </div>
 
-    <div class="form-group full">
-      <label for="confirm-pass">Confirm New Password *</label>
-      <input class="form-control" id="confirm-pass" type="password" autocomplete="new-password" />
-    </div>
-  </div>
+            <div class="form-group full">
+              <label for="confirm-pass">Confirm New Password *</label>
+              <input class="form-control" id="confirm-pass" type="password" autocomplete="new-password" />
+            </div>
+          </div>
 
-  <div class="form-actions">
-    <button class="btn btn-secondary" type="button" id="clear-pass-btn">Clear</button>
-    <button class="btn btn-primary" type="button" id="change-pass-btn">Update Password</button>
-  </div>
-</div>
+          <div class="form-actions">
+            <button class="btn btn-secondary" type="button" id="clear-pass-btn">Clear</button>
+            <button class="btn btn-primary" type="button" id="change-pass-btn">Update Password</button>
+          </div>
+        </div>
 
       </div>
     </div>

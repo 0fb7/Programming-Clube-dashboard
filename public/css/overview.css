@@ -1,83 +1,340 @@
 /* ============================================================
-   overview.css — Overview Dashboard Page Styles
+   overview.css — Overview Dashboard Page Styles (Refined)
    Depends on: base.css, dashboard.css
    ============================================================ */
 
 /* ── Stats grid ── */
 .stats-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
-  gap: 16px;
-  margin-bottom: 28px;
+  grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+  gap: 18px;
+  margin-bottom: 32px;
 }
 
+/* ── Stat card ── */
 .stat-card {
-  background: var(--navy);
-  border: 1px solid rgba(255, 255, 255, 0.07);
-  border-radius: var(--radius);
-  padding: 20px;
+  background: linear-gradient(145deg, rgba(255,255,255,0.045) 0%, rgba(255,255,255,0.015) 100%);
+  border: 1px solid rgba(255,255,255,0.08);
+  border-radius: 20px;
+  padding: 24px 22px 20px;
   position: relative;
   overflow: hidden;
+  transition: transform 0.26s cubic-bezier(.22,.68,0,1.2),
+              box-shadow 0.26s ease,
+              border-color 0.26s ease;
+  box-shadow: 0 2px 12px rgba(0,0,0,0.18), 0 1px 0 rgba(255,255,255,0.04) inset;
 }
+
+.stat-card:hover {
+  transform: translateY(-3px);
+  border-color: rgba(255,255,255,0.14);
+  box-shadow: 0 12px 36px rgba(0,0,0,0.28), 0 1px 0 rgba(255,255,255,0.06) inset;
+}
+
+/* Accent bar — thicker, softer glow */
 .stat-card::before {
   content: '';
   position: absolute;
   top: 0; left: 0; right: 0;
-  height: 3px;
-  border-radius: var(--radius) var(--radius) 0 0;
-  background: var(--blue);
+  height: 2px;
+  border-radius: 20px 20px 0 0;
+  background: linear-gradient(90deg, var(--blue), rgba(99,130,255,0.3));
+  opacity: 0.9;
 }
-.stat-card.sky::before   { background: var(--sky); }
-.stat-card.green::before { background: var(--green); }
-.stat-card.amber::before { background: var(--amber); }
+.stat-card.sky::before   { background: linear-gradient(90deg, var(--sky),   rgba(102,214,255,0.3)); }
+.stat-card.green::before { background: linear-gradient(90deg, var(--green), rgba(66,212,158,0.3)); }
+.stat-card.amber::before { background: linear-gradient(90deg, var(--amber), rgba(255,191,77,0.3)); }
 
-.stat-icon  { font-size: 28px; margin-bottom: 10px; }
-.stat-value { font-size: 32px; font-weight: 800; line-height: 1; }
-.stat-label { font-size: 12px; color: rgba(232, 232, 234, 0.5); margin-top: 5px; font-weight: 600; }
+/* Subtle ambient glow behind the accent bar */
+.stat-card::after {
+  content: '';
+  position: absolute;
+  top: -30px; left: -10px; right: -10px;
+  height: 60px;
+  background: var(--blue);
+  opacity: 0.04;
+  filter: blur(20px);
+  pointer-events: none;
+  border-radius: 50%;
+  transition: opacity 0.26s ease;
+}
+.stat-card:hover::after  { opacity: 0.09; }
+.stat-card.sky::after    { background: var(--sky); }
+.stat-card.green::after  { background: var(--green); }
+.stat-card.amber::after  { background: var(--amber); }
 
-/* ── Two column layout ── */
+/* ── Stat icon ── */
+.stat-icon {
+  width: 54px;
+  height: 54px;
+  border-radius: 16px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin: 0 auto 16px;
+  box-shadow: 0 8px 20px rgba(0,0,0,0.15), 0 1px 0 rgba(255,255,255,0.12) inset;
+  border: 1px solid rgba(255,255,255,0.12);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  transition: transform 0.24s cubic-bezier(.22,.68,0,1.2),
+              box-shadow 0.24s ease,
+              border-color 0.24s ease;
+}
+
+.stat-card:hover .stat-icon {
+  transform: translateY(-3px) scale(1.04);
+  box-shadow: 0 16px 30px rgba(0,0,0,0.22), 0 1px 0 rgba(255,255,255,0.16) inset;
+  border-color: rgba(255,255,255,0.2);
+}
+
+.stat-icon svg {
+  width: 26px;
+  height: 26px;
+  display: block;
+  flex: 0 0 26px;
+  stroke: currentColor;
+  fill: none;
+  stroke-width: 1.8;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+/* ── Stat values & labels ── */
+.stat-value {
+  font-size: 34px;
+  font-weight: 800;
+  line-height: 1;
+  letter-spacing: -0.02em;
+  display: flex;
+  justify-content: center;
+  color: rgba(232,232,234,0.97);
+}
+
+.stat-label {
+  font-size: 11px;
+  color: rgba(232,232,234,0.42);
+  margin-top: 6px;
+  font-weight: 600;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  display: flex;
+  justify-content: center;
+}
+
+/* ── Two-column layout ── */
 .two-col {
   display: grid;
   grid-template-columns: 1fr 1fr;
   gap: 20px;
 }
 
-/* ── Activity feed ── */
+/* ── Activity feed items ── */
 .activity-feed-item {
   display: flex;
   align-items: center;
-  gap: 12px;
-  padding: 10px 0;
-  border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+  gap: 14px;
+  padding: 11px 0;
+  border-bottom: 1px solid rgba(255,255,255,0.046);
+  transition: background 0.18s ease;
 }
 .activity-feed-item:last-child { border-bottom: none; }
+.activity-feed-item:hover { background: rgba(255,255,255,0.022); border-radius: 10px; padding-left: 6px; padding-right: 6px; }
 
-.af-dot  { width: 8px; height: 8px; border-radius: 50%; background: var(--blue); flex-shrink: 0; }
-.af-text { font-size: 13px; flex: 1; }
-.af-time { font-size: 11px; color: rgba(232, 232, 234, 0.35); }
-
-/* ── Responsive ── */
-@media (max-width: 900px) {
-  .two-col { grid-template-columns: 1fr; }
+.af-dot {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: var(--blue);
+  flex-shrink: 0;
+  box-shadow: 0 0 6px rgba(99,130,255,0.55);
 }
 
+.af-text {
+  font-size: 13px;
+  flex: 1;
+  line-height: 1.45;
+  color: rgba(232,232,234,0.88);
+}
+
+.af-text strong {
+  color: rgba(232,232,234,0.97);
+  font-weight: 600;
+}
+
+.af-time {
+  font-size: 11px;
+  color: rgba(232,232,234,0.32);
+}
+
+/* ── Points pill ── */
+.pts-pill {
+  display: inline-flex;
+  align-items: center;
+  padding: 3px 10px;
+  border-radius: 999px;
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  background: rgba(99,130,255,0.14);
+  color: rgba(160,180,255,0.95);
+  border: 1px solid rgba(99,130,255,0.22);
+  white-space: nowrap;
+}
+
+/* ── Sidebar logo ── */
+.sidebar-logo-icon {
+  width: clamp(70px, 2.6vw, 100px);
+  height: clamp(50px, 2.6vw, 50px);
+  border-radius: 9px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  
+}
 
 .sidebar-logo-img
 {
   display: flex;
   align-items: center;
   justify-content: center;
-  width: 100%;
-  height: 100%;
+  width: clamp(70px, 2.6vw, 100px);
+  height: clamp(50px, 2.6vw, 50px);
+  object-fit:fill;
 }
-.sidebar-logo-icon {
-  display: flex;
+
+/* ── Committee icon colors ── */
+.stat-icon-committee1 {
+  color: #5c7dff;
+  background: linear-gradient(135deg, rgba(92,125,255,0.2), rgba(92,125,255,0.07));
+  border-color: rgba(92,125,255,0.22);
+}
+
+.stat-icon-committee2 {
+  color: #e06090;
+  background: linear-gradient(135deg, rgba(224,96,144,0.2), rgba(224,96,144,0.07));
+  border-color: rgba(224,96,144,0.22);
+}
+
+.stat-icon-committee3 {
+  color: #18b090;
+  background: linear-gradient(135deg, rgba(24,176,144,0.2), rgba(24,176,144,0.07));
+  border-color: rgba(24,176,144,0.22);
+}
+
+.stat-icon-committee4 {
+  color: #f5a623;
+  background: linear-gradient(135deg, rgba(245,166,35,0.2), rgba(245,166,35,0.07));
+  border-color: rgba(245,166,35,0.22);
+}
+
+/* Committee summary SVGs — filled style */
+.stat-icon-committee1 svg,
+.stat-icon-committee2 svg,
+.stat-icon-committee3 svg,
+.stat-icon-committee4 svg {
+  fill: currentColor;
+  stroke: none;
+}
+
+/* ── Stat-card per-type icon colors ── */
+.stat-card-students .stat-icon {
+  color: #8ba5ff;
+  background: linear-gradient(135deg, rgba(139,165,255,0.18), rgba(139,165,255,0.06));
+  border-color: rgba(139,165,255,0.2);
+}
+                                                                                                   /* here color icon */
+.stat-card-activities .stat-icon {
+  color: #50d8ff;
+  background: linear-gradient(135deg, rgba(80,216,255,0.18), rgba(80,216,255,0.06));
+  border-color: rgba(80,216,255,0.2);
+}
+
+.stat-card-assignments .stat-icon {
+  color: #40d4a0;
+  background: linear-gradient(135deg, rgba(64,212,160,0.18), rgba(64,212,160,0.06));
+  border-color: rgba(64,212,160,0.2);
+}
+
+.stat-card-points .stat-icon {
+  color: #f5c050;
+  background: linear-gradient(135deg, rgba(245,192,80,0.18), rgba(245,192,80,0.06));
+  border-color: rgba(245,192,80,0.2);
+}
+
+/* ── Responsive ── */
+@media (max-width: 900px) {
+  .two-col { grid-template-columns: 1fr; }
+}
+
+@media (max-width: 640px) {
+  .stat-icon {
+    width: 50px;
+    height: 50px;
+    border-radius: 14px;
+  }
+  .stat-icon svg {
+    width: 24px;
+    height: 24px;
+    flex-basis: 24px;
+  }
+  .stats-grid {
+    grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+    gap: 14px;
+  }
+  .stat-value { font-size: 28px; }
+}
+
+
+.committee-inline-icon {
+  display: inline-flex;
   align-items: center;
   justify-content: center;
-  /* background-color: var(--light); */
- width: clamp(70px, 2.6vw, 100px);
-  height: clamp(50px, 2.6vw, 50px);
-  
-  
-  
+  width: 14px;
+  height: 14px;
+  vertical-align: -2px;
+  margin: 0 4px 0 2px;
+}
+
+.committee-inline-icon svg {
+  width: 100%;
+  height: 100%;
+  display: block;
+  fill: currentColor;
+  color:rgba(99,130,255,0.55);
+}
+.committee-stats-list {
+  display: grid;
+  gap: 10px;
+  text-align: left;
+}
+
+.committee-stat-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  color: rgba(232,232,234,.92);
+}
+
+.committee-stat-icon {
+  width: 20px;
+  height: 20px;
+  padding: 4px;
+  border-radius: 10px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  background: rgba(255,255,255,0.06);
+  border: 1px solid rgba(255,255,255,0.08);
+}
+
+.committee-stat-icon svg {
+  width: 100%;
+  height: 100%;
+  display: block;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 1.8;
+  stroke-linecap: round;
+  stroke-linejoin: round;
 }
